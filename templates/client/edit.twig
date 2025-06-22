@@ -1,0 +1,99 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}{{ pageTitle }} - Fleurs & Plantes{% endblock %}
+
+{% block content %}
+    <div class="breadcrumb">
+        <a href="{{ BASE_URL }}/"><i class="fas fa-home"></i> Accueil</a> &gt;
+        <a href="{{ BASE_URL }}/clients"><i class="fas fa-users"></i> Clients</a> &gt;
+        <a href="{{ BASE_URL }}/client/{{ client.id }}">{{ client.prenom }} {{ client.nom }}</a> &gt;
+        <span>Modifier</span>
+    </div>
+
+    <div class="page-header">
+        <h2><i class="fas fa-user-edit"></i> {{ pageTitle }}</h2>
+        <div class="page-header-actions">
+            <a href="{{ BASE_URL }}/client/{{ client.id }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour aux détails
+            </a>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <form action="{{ BASE_URL }}/client/{{ client.id }}/update" method="post" class="form">
+            {% if errors is defined and errors|length > 0 %}
+                <div class="alert alert-danger">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Erreurs dans le formulaire</h4>
+                    <ul class="error-list">
+                        {% for field, error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="nom">Nom *</label>
+                    <input type="text" name="nom" id="nom" class="form-control {% if errors.nom is defined %}is-invalid{% endif %}" 
+                           value="{{ client.nom }}" required>
+                    <small class="form-text text-muted">Nom de famille du client</small>
+                </div>
+                
+                <div class="form-group col-md-6">
+                    <label for="prenom">Prénom *</label>
+                    <input type="text" name="prenom" id="prenom" class="form-control {% if errors.prenom is defined %}is-invalid{% endif %}" 
+                           value="{{ client.prenom }}" required>
+                    <small class="form-text text-muted">Prénom du client</small>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="email">Email *</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        </div>
+                        <input type="email" name="email" id="email" class="form-control {% if errors.email is defined %}is-invalid{% endif %}" 
+                               value="{{ client.email }}" required>
+                    </div>
+                    <small class="form-text text-muted">Adresse email valide pour les communications</small>
+                </div>
+                
+                <div class="form-group col-md-6">
+                    <label for="telephone">Téléphone</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                        </div>
+                        <input type="tel" name="telephone" id="telephone" class="form-control {% if errors.telephone is defined %}is-invalid{% endif %}" 
+                               value="{{ client.telephone }}" placeholder="Ex: (514) 999-9999">
+                    </div>
+                    <small class="form-text text-muted">Numéro de téléphone optionnel</small>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="adresse">Adresse</label>
+                <textarea name="adresse" id="adresse" class="form-control {% if errors.adresse is defined %}is-invalid{% endif %}" rows="4" 
+                          placeholder="Adresse complète: rue, ville, code postal, pays...">{{ client.adresse }}</textarea>
+                <small class="form-text text-muted">Adresse postale pour la livraison</small>
+            </div>
+            
+            <div class="form-separator"></div>
+            
+            <div class="form-text text-muted mb-3">* Champs obligatoires</div>
+            
+            <div class="form-actions">                <div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Mettre à jour
+                    </button>
+                    <a href="{{ BASE_URL }}/client/{{ client.id }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Annuler
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}{{ pageTitle }} - Fleurs & Plantes{% endblock %}
+
+{% block content %}
+    <div class="breadcrumb">
+        <a href="{{ BASE_URL }}/"><i class="fas fa-home"></i> Accueil</a> &gt;
+        <span>Clients</span>
+    </div>
+
+    <div class="page-header">
+        <h2><i class="fas fa-users"></i> {{ pageTitle }}</h2>
+        <a href="{{ BASE_URL }}/client/create" class="btn btn-primary"><i class="fas fa-plus"></i> Nouveau client</a>
+    </div>
+
+    {% if clients|length > 0 %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Téléphone</th>
+                        <th>Commandes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in clients %}
+                        <tr>
+                            <td>{{ client.id }}</td>
+                            <td><a href="{{ BASE_URL }}/client/{{ client.id }}" class="client-link">{{ client.prenom }} {{ client.nom }}</a></td>
+                            <td><a href="mailto:{{ client.email }}"><i class="fas fa-envelope"></i> {{ client.email }}</a></td>
+                            <td>
+                                {% if client.telephone %}
+                                    <a href="tel:{{ client.telephone }}"><i class="fas fa-phone"></i> {{ client.telephone }}</a>
+                                {% else %}
+                                    <span class="text-muted"><em>Non renseigné</em></span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if client.nombre_commandes is defined %}
+                                    {% if client.nombre_commandes > 0 %}
+                                        <span class="badge badge-success">{{ client.nombre_commandes }}</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">0</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge badge-secondary">?</span>
+                                {% endif %}
+                            </td>
+                            <td class="action-buttons">
+                                <a href="{{ BASE_URL }}/client/{{ client.id }}" class="btn btn-sm btn-info" title="Voir détails">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ BASE_URL }}/client/{{ client.id }}/edit" class="btn btn-sm btn-primary" title="Modifier">
+                                    <i class="fas fa-edit"></i>
+                                </a>                                <a href="{{ BASE_URL }}/client/{{ client.id }}/commande/create" class="btn btn-sm btn-success" title="Créer une commande">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Aucun client trouvé.
+        </div>
+    {% endif %}
+{% endblock %}

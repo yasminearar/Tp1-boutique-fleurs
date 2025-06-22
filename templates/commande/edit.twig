@@ -1,0 +1,189 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}Modifier Commande #{{ commande.id }} - Fleurs & Plantes{% endblock %}
+
+{% block content %}
+    <div class="breadcrumb">
+        <a href="{{ BASE_URL }}/"><i class="fas fa-home"></i> Accueil</a> &gt;
+        <a href="{{ BASE_URL }}/commandes"><i class="fas fa-shopping-cart"></i> Commandes</a> &gt;
+        <a href="{{ BASE_URL }}/commande/{{ commande.id }}"><i class="fas fa-receipt"></i> Commande #{{ commande.id }}</a> &gt;
+        <span>Modifier</span>
+    </div>    <div class="page-header">
+        <h2><i class="fas fa-truck-loading"></i> Mise à jour du statut - Commande #{{ commande.id }}</h2>
+        <div class="page-header-actions">
+            <a href="{{ BASE_URL }}/commande/{{ commande.id }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour aux détails
+            </a>
+        </div>
+    </div>
+
+    <div class="alert alert-primary mb-4">
+        <i class="fas fa-info-circle fa-lg"></i> Cette page vous permet de <strong>modifier le statut</strong> de la commande et d'ajouter des notes. Les articles et quantités ne peuvent pas être modifiés.
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Formulaire de modification</h3>
+        </div>
+        <div class="card-body form-container">
+            <form action="{{ BASE_URL }}/commande/{{ commande.id }}/update" method="POST" id="commande-form" class="form">
+                {% if errors is defined and errors|length > 0 %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> Veuillez corriger les erreurs suivantes:
+                        <ul class="error-list mt-2">
+                            {% for field, error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h4 class="card-subtitle"><i class="fas fa-user"></i> Information client</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="client_id">Client</label>
+                            <div class="client-info-card">
+                                <div class="client-details">
+                                    <i class="fas fa-user-circle fa-2x client-icon"></i>
+                                    <div>
+                                        <strong class="client-name">{{ client.prenom }} {{ client.nom }}</strong>
+                                        <span class="client-email">{{ client.email }}</span>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="client_id" id="client_id" value="{{ client.id }}">
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Le client ne peut pas être modifié. Si nécessaire, créez une nouvelle commande.
+                            </small>
+                        </div>                    </div>                </div>                <div class="mb-4 p-4">
+                    <h3 class="text-primary mb-3"><i class="fas fa-truck"></i> Modification du statut de la commande</h3>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb"></i> <strong>Action principale :</strong> Sélectionnez le nouveau statut de la commande ci-dessous.
+                    </div>
+                    
+                    <div class="status-timeline mb-5">
+                        <div class="status-step {{ commande.statut == 'en cours' or commande.statut == 'expédiée' or commande.statut == 'livrée' ? 'active' : '' }}">
+                            <div class="status-icon">
+                                <i class="fas fa-clipboard-check"></i>
+                            </div>
+                            <div class="status-label">En cours</div>
+                        </div>
+                        <div class="status-connector {{ commande.statut == 'expédiée' or commande.statut == 'livrée' ? 'active' : '' }}"></div>
+                        <div class="status-step {{ commande.statut == 'expédiée' or commande.statut == 'livrée' ? 'active' : '' }}">
+                            <div class="status-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <div class="status-label">Expédiée</div>
+                        </div>
+                        <div class="status-connector {{ commande.statut == 'livrée' ? 'active' : '' }}"></div>
+                        <div class="status-step {{ commande.statut == 'livrée' ? 'active' : '' }}">
+                            <div class="status-icon">
+                                <i class="fas fa-box-open"></i>
+                            </div>
+                            <div class="status-label">Livrée</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mt-5">
+                        <label for="statut" class="form-label-lg mb-3">Choisir un nouveau statut :</label>
+                        <select name="statut" id="statut" class="form-control custom-select form-control-lg py-3" style="height: auto; font-size: 1.2rem;">
+                            {% for key, label in {"en cours": "En cours", "expédiée": "Expédiée", "livrée": "Livrée"} %}
+                                <option value="{{ key }}" {% if commande.statut == key %}selected{% endif %} class="status-option-{{ key|replace({' ': '-'}) }}" style="padding: 10px 0;">
+                                    {% if key == 'en cours' %}
+                                        <i class="fas fa-clipboard-check"></i> 
+                                    {% elseif key == 'expédiée' %}
+                                        <i class="fas fa-truck"></i> 
+                                    {% else %}
+                                        <i class="fas fa-box-open"></i> 
+                                    {% endif %}
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted mt-3">
+                            <i class="fas fa-info-circle"></i> La modification du statut sera enregistrée dans l'historique de la commande.
+                        </small>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h4 class="card-subtitle"><i class="fas fa-leaf"></i> Détails de la commande</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="details-table">
+                                <thead class="thead-light">
+                                    <tr>                                        <th><i class="fas fa-leaf"></i> Plante</th>
+                                        <th><i class="fas fa-tag"></i> Prix unitaire</th>
+                                        <th><i class="fas fa-sort-numeric-up"></i> Quantité</th>
+                                        <th><i class="fas fa-dollar-sign"></i> Total</th>
+                                    </tr>
+                                </thead>                                <tbody>
+                                    {% for detail in details %}
+                                        <tr>                                            <td>                                                <div class="plante-info-container">
+                                                    <div class="plante-thumbnail">                                                        {% if detail.image_url %}
+                                                            <img src="{{ ASSETS_URL }}/images/plantes/{{ detail.image_url }}" alt="{{ detail.nom }}">
+                                                        {% else %}
+                                                            <img src="{{ ASSETS_URL }}/images/plantes/default-plant.jpg" alt="Image non disponible" class="placeholder-img">
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="plante-details">
+                                                        <strong>{{ detail.nom }}</strong>
+                                                        {% if detail.categorie_nom %}
+                                                            <small class="text-muted d-block">{{ detail.categorie_nom }}</small>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="price-cell">{{ detail.prix_unitaire|number_format(2, ',', ' ') }} $</td>
+                                            <td>
+                                                <span class="badge badge-primary">{{ detail.quantite }}</span>
+                                            </td>
+                                            <td class="price-cell">{{ (detail.prix_unitaire * detail.quantite)|number_format(2, ',', ' ') }} $</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-active">
+                                        <th colspan="3" class="text-right">Total de la commande :</th>
+                                        <th class="price-cell">{{ commande.total|number_format(2, ',', ' ') }} $</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle"></i> Pour modifier les articles ou les quantités, veuillez annuler cette commande et en créer une nouvelle.
+                        </div>
+                    </div>
+                </div>
+                  <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h4 class="card-subtitle"><i class="fas fa-comment-alt"></i> Notes additionnelles</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="notes">Notes (optionnel)</label>
+                            <textarea id="notes" name="notes" class="form-control" rows="3" placeholder="Ajoutez des informations complémentaires sur la commande...">{% if commande.notes is defined %}{{ commande.notes }}{% endif %}</textarea>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Vous pouvez ajouter des instructions spéciales, des commentaires sur la livraison, etc.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                        <i class="fas fa-truck"></i> Mettre à jour le statut de la commande
+                    </button>
+                    <a href="{{ BASE_URL }}/commande/{{ commande.id }}" class="btn btn-secondary btn-lg ml-3">
+                        <i class="fas fa-times-circle"></i> Annuler
+                    </a>
+                </div>
+            </form>
+        </div>    </div>
+{% endblock %}

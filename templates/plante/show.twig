@@ -1,0 +1,74 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}{{ plante.nom }} - Fleurs & Plantes{% endblock %}
+
+{% block content %}
+    <div class="breadcrumb">
+        <a href="{{ BASE_URL }}/"><i class="fas fa-home"></i> Accueil</a> &gt;
+        <a href="{{ BASE_URL }}/plantes"><i class="fas fa-leaf"></i> Plantes</a> &gt;
+        <span>{{ plante.nom }}</span>
+    </div>
+
+    <div class="page-header">
+        <h2><i class="fas fa-info-circle"></i> Détails de la plante</h2>
+        <div class="page-header-actions">
+            <a href="{{ BASE_URL }}/plantes" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    </div>
+
+    <div class="plante-detail">
+        <div class="plante-detail-grid">
+            <div class="plante-image-container">
+                {% if plante.image %}
+                    <img src="{{ ASSETS_URL }}/images/plantes/{{ plante.image }}" alt="{{ plante.nom }}" class="plante-image-large">
+                {% else %}
+                    <img src="{{ ASSETS_URL }}/images/plantes/placeholder.jpg" alt="Pas d'image" class="plante-image-large">
+                {% endif %}
+                
+                <div class="plante-price-badge">
+                    <span>{{ plante.prix }} $</span>
+                </div>
+            </div>
+
+            <div class="plante-info-container">
+                <h2 class="plante-title">{{ plante.nom }}</h2>
+                
+                <div class="plante-meta">
+                    <div class="meta-item">
+                        <span class="meta-label"><i class="fas fa-tag"></i> Catégorie:</span>
+                        <span class="meta-value">
+                            <a href="{{ BASE_URL }}/categorie/{{ categorie.id }}" class="category-link">{{ categorie.nom }}</a>
+                        </span>
+                    </div>
+                    
+                    <div class="meta-item">
+                        <span class="meta-label"><i class="fas fa-cubes"></i> Disponibilité:</span>
+                        <span class="meta-value stock-status {% if plante.stock <= 0 %}out-of-stock{% endif %}">
+                            {% if plante.stock > 0 %}
+                                <span class="stock-available">En stock ({{ plante.stock }} unités)</span>
+                            {% else %}
+                                <span class="stock-unavailable">Rupture de stock</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                {% if plante.description %}
+                <div class="plante-description">
+                    <h3><i class="fas fa-align-left"></i> Description</h3>
+                    <div class="description-content">
+                        {{ plante.description|nl2br }}
+                    </div>
+                </div>
+                {% endif %}
+                  <div class="plante-actions">
+                    <a href="{{ BASE_URL }}/plante/{{ plante.id }}/edit" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

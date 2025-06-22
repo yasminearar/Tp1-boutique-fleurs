@@ -1,0 +1,65 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}Boutique de Plantes - Administration{% endblock %}
+
+{% block body_class %}home-page{% endblock %}
+
+{# Surcharge le bloc de navigation pour ne rien afficher sur la page d'accueil #}
+{% block navigation %}{% endblock %}
+
+{% block content %}
+
+<!-- En-tête pleine largeur avec image de fond -->
+<div class="welcome-header">
+    <h1>Administration de la Boutique de Plantes</h1>
+    <p>Gérez votre inventaire, vos clients et vos commandes</p>
+</div>
+
+<!-- Contenu central avec fond clair -->
+<div class="admin-container">
+
+    <!-- Message de bienvenue -->
+    <div class="welcome-text">
+        <p>Bienvenue dans l'interface d'administration de votre boutique de plantes.
+        Utilisez les différentes sections ci-dessous pour gérer votre boutique.</p>
+    </div>    <!-- Grille de cartes -->
+    <div class="nav-grid">
+
+        <!-- Plantes -->
+        <div class="nav-card">
+            <i class="fas fa-leaf fa-3x"></i>
+            <h2>Plantes</h2>
+            <p>Gérez votre catalogue de plantes</p>
+            <p><strong>{{ total_plantes }}</strong> plantes en stock</p>
+            <a href="{{ BASE_URL }}/plantes" class="admin-link">Plantes</a>
+        </div>
+
+        <!-- Catégories -->
+        <div class="nav-card">
+            <i class="fas fa-tags fa-3x"></i>
+            <h2>Catégories</h2>
+            <p>Organisez vos plantes par catégories</p>
+            <p><strong>{{ total_categories }}</strong> catégories</p>
+            <a href="{{ BASE_URL }}/categories" class="admin-link">Catégories</a>
+        </div>
+
+        <!-- Clients -->
+        <div class="nav-card">
+            <i class="fas fa-users fa-3x"></i>
+            <h2>Clients</h2>
+            <p>Prenez le contrôle de votre base de clients</p>
+            <p><strong>{{ total_clients }}</strong> clients enregistrés</p>
+            <a href="{{ BASE_URL }}/clients" class="admin-link">Clients</a>
+        </div>
+
+        <!-- Commandes -->
+        <div class="nav-card">
+            <i class="fas fa-shopping-cart fa-3x"></i>
+            <h2>Commandes</h2>
+            <p>Suivez les commandes de vos clients</p>
+            <p><strong>{{ total_commandes }}</strong> commandes</p>
+            <a href="{{ BASE_URL }}/commandes" class="admin-link">Commandes</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

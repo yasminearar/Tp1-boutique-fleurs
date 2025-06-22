@@ -1,0 +1,98 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}{{ categorie.nom }} - Fleurs & Plantes{% endblock %}
+
+{% block content %}
+    <div class="breadcrumb">
+        <a href="{{ BASE_URL }}/"><i class="fas fa-home"></i> Accueil</a> &gt;
+        <a href="{{ BASE_URL }}/categories"><i class="fas fa-tags"></i> Catégories</a> &gt;
+        <span>{{ categorie.nom }}</span>
+    </div>
+
+    <div class="page-header">
+        <h2><i class="fas fa-tag"></i> {{ categorie.nom }}</h2>
+        <div class="page-header-actions">
+            <a href="{{ BASE_URL }}/categories" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>            <a href="{{ BASE_URL }}/categorie/{{ categorie.id }}/edit" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Modifier
+            </a>
+        </div>
+    </div>
+
+    <div class="category-detail">
+        <div class="category-info-container">
+            <div class="info-card">
+                <h3><i class="fas fa-info-circle"></i> Information</h3>
+                
+                <div class="info-content">
+                    <div class="info-item">
+                        <span class="info-label">Identifiant:</span>
+                        <span class="info-value">{{ categorie.id }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Nombre de plantes:</span>
+                        <span class="info-value">
+                            <span class="badge {{ plantes|length > 0 ? 'badge-success' : 'badge-secondary' }}">
+                                {{ plantes|length }}
+                            </span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="description-card">
+                <h3><i class="fas fa-align-left"></i> Description</h3>
+                <div class="description-content">
+                    {% if categorie.description %}
+                        {{ categorie.description|nl2br }}
+                    {% else %}
+                        <p class="text-muted"><em>Aucune description disponible</em></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="category-plantes">
+            <h3 class="section-title"><i class="fas fa-leaf"></i> Plantes dans cette catégorie</h3>
+
+            {% if plantes is empty %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Aucune plante n'est classée dans cette catégorie.
+                </div>
+            {% else %}
+                <div class="plantes-grid">
+                    {% for plante in plantes %}                        <div class="plante-card">                            <div class="plante-image">
+                                {% if plante.image_url %}
+                                    <img src="{{ ASSETS_URL }}/images/plantes/{{ plante.image_url }}" alt="{{ plante.nom }}">
+                                {% else %}
+                                    <img src="{{ ASSETS_URL }}/images/plantes/placeholder.jpg" alt="Pas d'image">
+                                {% endif %}
+                            </div>
+                            <div class="plante-content">
+                                <h3>{{ plante.nom }}</h3>
+                                <p class="plante-price">{{ plante.prix }} $</p>
+                                <p class="plante-stock {% if plante.stock <= 0 %}out-of-stock{% endif %}">
+                                    {% if plante.stock > 0 %}
+                                        Stock : {{ plante.stock }}
+                                    {% else %}
+                                        Rupture de stock
+                                    {% endif %}
+                                </p>
+                                <div class="plante-actions">
+                                    <a href="{{ BASE_URL }}/plante/{{ plante.id }}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i> Détails
+                                    </a>
+                                    <a href="{{ BASE_URL }}/plante/{{ plante.id }}/edit" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

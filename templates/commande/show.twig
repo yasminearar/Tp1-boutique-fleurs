@@ -1,0 +1,214 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}{{ pageTitle }} - Fleurs & Plantes{% endblock %}
+
+{% block content %}
+    <div class="breadcrumb">
+        <a href="{{ BASE_URL }}/"><i class="fas fa-home"></i> Accueil</a> &gt;
+        <a href="{{ BASE_URL }}/commandes"><i class="fas fa-shopping-cart"></i> Commandes</a> &gt;
+        <span><i class="fas fa-receipt"></i> Détails commande #{{ commande.id }}</span>
+    </div>
+    
+    <div class="page-header">
+        <h2><i class="fas fa-receipt"></i> {{ pageTitle }}</h2>
+        <div class="page-header-actions">
+            <a href="{{ BASE_URL }}/commandes" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour aux commandes
+            </a>            {% if commande.statut != 'livrée' %}
+            <a href="{{ BASE_URL }}/commande/{{ commande.id }}/edit" class="btn btn-primary">
+                <i class="fas fa-truck"></i> Mettre à jour le statut
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="card-title mb-0"><i class="fas fa-info-circle"></i> Informations de la commande</h3>
+                <span class="status-badge status-{{ commande.statut|replace({' ': '-'}) }} status-badge-lg">
+                    <i class="fas {{ commande.statut == 'en cours' ? 'fa-clock' : (commande.statut == 'expédiée' ? 'fa-truck' : 'fa-check-circle') }}"></i>
+                    {{ commande.statut|capitalize }}
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-section">
+                        <h4 class="section-title"><i class="fas fa-file-invoice"></i> Détails de la commande</h4>
+                        <div class="info-item">
+                            <span class="info-label"><i class="far fa-calendar-alt"></i> Date de commande:</span>
+                            <span class="info-value">{{ commande.date_commande|date("d/m/Y H:i") }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"><i class="fas fa-hashtag"></i> Numéro de commande:</span>
+                            <span class="info-value">#{{ commande.id }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label"><i class="fas fa-dollar-sign"></i> Total:</span>
+                            <span class="info-value price-value">{{ commande.total|number_format(2, ',', ' ') }} $</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-section">
+                        <h4 class="section-title"><i class="fas fa-user"></i> Information client</h4>
+                        {% if client %}
+                        <div class="client-card">
+                            <div class="client-header">
+                                <i class="fas fa-user-circle fa-2x client-icon"></i>
+                                <div class="client-name">
+                                    <strong>{{ client.prenom }} {{ client.nom }}</strong>
+                                    <a href="{{ BASE_URL }}/client/{{ client.id }}" class="client-link">
+                                        <small><i class="fas fa-external-link-alt"></i> Voir profil</small>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="client-details">
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-envelope"></i> Email:</span>
+                                    <span class="info-value"><a href="mailto:{{ client.email }}">{{ client.email }}</a></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-phone"></i> Téléphone:</span>
+                                    <span class="info-value">
+                                        {% if client.telephone %}
+                                            <a href="tel:{{ client.telephone }}">{{ client.telephone }}</a>
+                                        {% else %}
+                                            <em class="text-muted">Non renseigné</em>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fas fa-map-marker-alt"></i> Adresse:</span>
+                                    <span class="info-value address">{{ client.adresse|nl2br }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> Client inconnu ou supprimé
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h3 class="card-title"><i class="fas fa-list"></i> Détails des articles commandés</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                {% if plantes_commande is defined and plantes_commande|length > 0 %}
+                    <table class="table table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th><i class="fas fa-leaf"></i> Plante</th>
+                                <th><i class="fas fa-image"></i> Aperçu</th>
+                                <th><i class="fas fa-sort-numeric-up"></i> Quantité</th>
+                                <th><i class="fas fa-tag"></i> Prix unitaire</th>
+                                <th><i class="fas fa-dollar-sign"></i> Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for detail in plantes_commande %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ BASE_URL }}/plante/{{ detail.id_plante }}" class="plante-link">
+                                            {{ detail.nom }}
+                                        </a>
+                                    </td>
+                                    <td>                                        {% if detail.image_url %}                                            <div class="product-img-container">
+                                                <img src="{{ ASSETS_URL }}/images/plantes/{{ detail.image_url }}" alt="{{ detail.nom }}" class="product-img" data-toggle="tooltip" title="{{ detail.nom }}">
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted"><em>Aucune image</em></span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-primary badge-pill">{{ detail.quantite }}</span>
+                                    </td>
+                                    <td class="price-cell">{{ detail.prix_unitaire|number_format(2, ',', ' ') }} $</td>
+                                    <td class="price-cell fw-bold">{{ (detail.prix_unitaire * detail.quantite)|number_format(2, ',', ' ') }} $</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-active">
+                                <th colspan="4" class="text-right">Total de la commande</th>
+                                <th class="price-cell price-total">{{ commande.total|number_format(2, ',', ' ') }} $</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Aucun détail disponible pour cette commande.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title"><i class="fas fa-tasks"></i> Statut de la commande</h3>
+        </div>
+        <div class="card-body">
+            <div class="status-timeline mb-4">
+                <div class="status-step {{ commande.statut == 'en cours' or commande.statut == 'expédiée' or commande.statut == 'livrée' ? 'active' : '' }}">
+                    <div class="status-icon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="status-label">En cours</div>
+                </div>
+                <div class="status-connector {{ commande.statut == 'expédiée' or commande.statut == 'livrée' ? 'active' : '' }}"></div>
+                <div class="status-step {{ commande.statut == 'expédiée' or commande.statut == 'livrée' ? 'active' : '' }}">
+                    <div class="status-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="status-label">Expédiée</div>
+                </div>
+                <div class="status-connector {{ commande.statut == 'livrée' ? 'active' : '' }}"></div>
+                <div class="status-step {{ commande.statut == 'livrée' ? 'active' : '' }}">
+                    <div class="status-icon">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <div class="status-label">Livrée</div>
+                </div>            </div>
+            
+            {% if commande.statut == 'livrée' %}
+                <div class="alert alert-success mt-4">
+                    <i class="fas fa-check-circle"></i> Cette commande a été livrée et son statut ne peut plus être modifié.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="text-center mb-4">
+        <a href="{{ BASE_URL }}/commandes" class="btn btn-secondary">
+            <i class="fas fa-list"></i> Voir toutes les commandes
+        </a>
+        {% if client %}
+        <a href="{{ BASE_URL }}/client/{{ client.id }}" class="btn btn-info">
+            <i class="fas fa-user"></i> Voir le profil client
+        </a>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    $(document).ready(function() {
+        // Initialiser les tooltips pour les images de produits
+        $('[data-toggle="tooltip"]').tooltip();
+        
+        // Animation lors du changement de statut
+        $('#statut').on('change', function() {
+            $('.status-form').addClass('highlight-form');
+            setTimeout(function() {
+                $('.status-form').removeClass('highlight-form');
+            }, 500);
+        });
+    });
+</script>
+{% endblock %}

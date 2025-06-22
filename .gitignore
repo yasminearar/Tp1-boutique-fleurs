@@ -1,0 +1,29 @@
+# Ignorer les fichiers de cache
+/cache/
+/cache/twig/*
+!/cache/twig/.gitkeep
+
+# Ignorer les fichiers générés par Composer
+/vendor/
+/composer.phar
+
+# Ignorer les fichiers système
+.DS_Store
+Thumbs.db
+
+# Ignorer les fichiers de configuration des IDE
+.idea/
+
+# Ignorer les fichiers de configuration d'environnement
+.env
+.env.local
+.env.*.local
+
+# Ignorer les fichiers de logs
+*.log
+/logs/
+
+# Ignorer les fichiers temporaires
+*.tmp
+*.bak
+*.swp

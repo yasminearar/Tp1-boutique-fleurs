@@ -1,0 +1,127 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}{{ pageTitle }} - Fleurs & Plantes{% endblock %}
+
+{% block content %}
+    <div class="breadcrumb">
+        <a href="{{ BASE_URL }}/"><i class="fas fa-home"></i> Accueil</a> &gt;
+        <a href="{{ BASE_URL }}/clients"><i class="fas fa-users"></i> Clients</a> &gt;
+        <span>{{ client.prenom }} {{ client.nom }}</span>
+    </div>
+
+    <div class="page-header">
+        <h2><i class="fas fa-user"></i> {{ pageTitle }}</h2>
+        <div class="page-header-actions">
+            <a href="{{ BASE_URL }}/clients" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>            <a href="{{ BASE_URL }}/client/{{ client.id }}/edit" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Modifier
+            </a>
+            <a href="{{ BASE_URL }}/client/{{ client.id }}/commande/create" class="btn btn-success">
+                <i class="fas fa-plus-circle"></i> Nouvelle commande
+            </a>
+        </div>
+    </div>
+
+    <div class="client-detail">
+        <div class="client-info-container">
+            <div class="client-profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <h3 class="profile-name">{{ client.prenom }} {{ client.nom }}</h3>
+                    <p class="profile-id">Client #{{ client.id }}</p>
+                </div>
+                
+                <div class="profile-body">
+                    <div class="profile-info-item">
+                        <span class="info-label"><i class="fas fa-envelope"></i> Email</span>
+                        <span class="info-value"><a href="mailto:{{ client.email }}">{{ client.email }}</a></span>
+                    </div>
+                    
+                    <div class="profile-info-item">
+                        <span class="info-label"><i class="fas fa-phone"></i> Téléphone</span>
+                        <span class="info-value">
+                            {% if client.telephone %}
+                                <a href="tel:{{ client.telephone }}">{{ client.telephone }}</a>
+                            {% else %}
+                                <span class="text-muted"><em>Non renseigné</em></span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="profile-info-item">
+                        <span class="info-label"><i class="fas fa-shopping-cart"></i> Commandes</span>
+                        <span class="info-value">
+                            <span class="badge {% if commandes|length > 0 %}badge-success{% else %}badge-secondary{% endif %}">
+                                {{ commandes|length }}
+                            </span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="client-address-card">
+                <h3><i class="fas fa-map-marker-alt"></i> Adresse</h3>
+                <div class="address-content">
+                    {% if client.adresse %}
+                        {{ client.adresse|nl2br }}
+                        <a href="https://www.google.com/maps/search/{{ client.adresse|url_encode }}" target="_blank" class="btn btn-sm btn-info mt-3">
+                            <i class="fas fa-map"></i> Voir sur Google Maps
+                        </a>
+                    {% else %}
+                        <p class="text-muted"><em>Adresse non renseignée</em></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="client-orders">
+            <h3 class="section-title"><i class="fas fa-shopping-bag"></i> Commandes du client</h3>
+            
+            {% if commandes|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for commande in commandes %}
+                                <tr>
+                                    <td>{{ commande.id }}</td>
+                                    <td><i class="far fa-calendar-alt"></i> {{ commande.date_commande|date("d/m/Y H:i") }}</td>
+                                    <td class="price-cell">{{ commande.total|number_format(2, ',', ' ') }} $</td>
+                                    <td>
+                                        <span class="status-badge status-{{ commande.statut|replace({' ': '-'}) }}">
+                                            {{ commande.statut|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td class="action-buttons">
+                                        <a href="{{ BASE_URL }}/commande/{{ commande.id }}" class="btn btn-sm btn-info" title="Voir la commande">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ BASE_URL }}/commande/{{ commande.id }}/edit" class="btn btn-sm btn-primary" title="Modifier la commande">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Aucune commande trouvée pour ce client.
+                    <a href="{{ BASE_URL }}/client/{{ client.id }}/commande/create" class="alert-link">Créer une commande maintenant ?</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

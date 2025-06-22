@@ -1,0 +1,53 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}Modifier {{ categorie.nom }} - Fleurs & Plantes{% endblock %}
+
+{% block content %}
+    <div class="breadcrumb">
+        <a href="{{ BASE_URL }}/"><i class="fas fa-home"></i> Accueil</a> &gt;
+        <a href="{{ BASE_URL }}/categories"><i class="fas fa-tags"></i> Catégories</a> &gt;
+        <a href="{{ BASE_URL }}/categorie/{{ categorie.id }}">{{ categorie.nom }}</a> &gt;
+        <span>Modifier</span>
+    </div>
+
+    <div class="page-header">
+        <h2><i class="fas fa-edit"></i> Modifier la catégorie</h2>
+        <div class="page-header-actions">
+            <a href="{{ BASE_URL }}/categorie/{{ categorie.id }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour aux détails
+            </a>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <form action="{{ BASE_URL }}/categorie/{{ categorie.id }}/update" method="post" class="form">
+            {% if errors is defined and errors|length > 0 %}
+                <div class="alert alert-danger">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Erreurs dans le formulaire</h4>
+                    <ul class="error-list">
+                        {% for field, error in errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}            <div class="form-group">
+                <label for="nom" class="form-label-lg mb-2">Nom de la catégorie *</label>
+                <input type="text" id="nom" name="nom" class="form-control form-control-lg py-3" style="height: auto; font-size: 1.1rem;" value="{{ categorie.nom|e }}" required maxlength="100">
+                <small class="form-text text-muted">Le nom de la catégorie doit être unique</small>
+            </div>            <div class="form-group">
+                <label for="description" class="form-label-lg mb-2">Description</label>
+                <textarea id="description" name="description" class="form-control form-control-lg" rows="4" style="font-size: 1.1rem;">{{ categorie.description|e }}</textarea>
+                <small class="form-text text-muted">Description optionnelle pour expliquer le type de plantes dans cette catégorie</small>
+            </div>
+
+            <div class="form-separator"></div>            <div class="form-actions">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check"></i> Mettre à jour
+                </button>
+                <a href="{{ BASE_URL }}/categorie/{{ categorie.id }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

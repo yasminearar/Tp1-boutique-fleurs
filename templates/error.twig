@@ -1,0 +1,11 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}Erreur {{ code }} - Boutique de Plantes{% endblock %}
+
+{% block content %}
+    <div class="error-page">
+        <h2>Erreur {{ code }}</h2>
+        <p>{{ message }}</p>
+        <a href="{{ BASE_URL }}/" class="btn btn-primary">Retourner à l'accueil</a>
+    </div>
+{% endblock %}

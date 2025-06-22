@@ -1,0 +1,70 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}{{ pageTitle }} - Fleurs & Plantes{% endblock %}
+
+{% block content %}
+    <div class="breadcrumb">
+        <a href="{{ BASE_URL }}/"><i class="fas fa-home"></i> Accueil</a> &gt;
+        <span>Commandes</span>
+    </div>
+
+    <div class="page-header">
+        <h2><i class="fas fa-shopping-cart"></i> {{ pageTitle }}</h2>        <div class="page-header-actions">
+            <a href="{{ BASE_URL }}/commande/create" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nouvelle commande
+            </a>
+        </div>
+    </div>
+
+    {% if commandes|length > 0 %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>                        <th>#</th>
+                        <th><i class="far fa-calendar-alt"></i> Date</th>
+                        <th><i class="fas fa-user"></i> Client</th>
+                        <th><i class="fas fa-dollar-sign"></i> Total</th>
+                        <th><i class="fas fa-truck"></i> Statut</th>
+                        <th><i class="fas fa-cogs"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for commande in commandes %}
+                        <tr>
+                            <td>{{ commande.id }}</td>
+                            <td>{{ commande.date_commande|date("d/m/Y H:i") }}</td>
+                            <td>
+                                {% if commande.client_nom %}
+                                    <a href="{{ BASE_URL }}/client/{{ commande.id_client }}" class="client-link">
+                                        {{ commande.client_prenom }} {{ commande.client_nom }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted"><em>Client inconnu</em></span>
+                                {% endif %}
+                            </td>
+                            <td class="price-cell">{{ commande.total|number_format(2, ',', ' ') }} $</td>
+                            <td>
+                                <span class="status-badge status-{{ commande.statut|replace({' ': '-'}) }}">
+                                    {{ commande.statut|capitalize }}
+                                </span>
+                            </td>
+                            <td class="action-buttons">
+                                <a href="{{ BASE_URL }}/commande/{{ commande.id }}" class="btn btn-sm btn-info" title="Voir la commande">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ BASE_URL }}/commande/{{ commande.id }}/edit" class="btn btn-sm btn-primary" title="Modifier la commande">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Aucune commande trouvée.
+            <a href="{{ BASE_URL }}/commande/create" class="alert-link">Créer votre première commande ?</a>
+        </div>
+    {% endif %}
+{% endblock %}

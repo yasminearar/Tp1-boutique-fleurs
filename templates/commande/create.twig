@@ -1,0 +1,223 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}{{ pageTitle }} - Fleurs & Plantes{% endblock %}
+
+{% block content %}
+    <div class="breadcrumb">
+        <a href="{{ BASE_URL }}/"><i class="fas fa-home"></i> Accueil</a> &gt;
+        <a href="{{ BASE_URL }}/commandes"><i class="fas fa-shopping-cart"></i> Commandes</a> &gt;
+        <span><i class="fas fa-plus-circle"></i> Nouvelle commande</span>
+    </div>
+
+    <div class="page-header">
+        <h2><i class="fas fa-plus-circle"></i> {{ pageTitle }}</h2>
+        <div class="page-header-actions">
+            <a href="{{ BASE_URL }}/commandes" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour aux commandes
+            </a>
+        </div>
+    </div>
+    
+    {% if flash_messages is defined and flash_messages.success is defined %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> {{ flash_messages.success }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endif %}
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Formulaire de commande</h3>
+        </div>
+        <div class="card-body form-container">
+            <form action="{{ BASE_URL }}/commande/store" method="POST" id="commande-form" class="form">
+                {% if errors is defined and errors|length > 0 %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> Veuillez corriger les erreurs suivantes:
+                        <ul class="error-list mt-2">
+                            {% for field, error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h4 class="card-subtitle"><i class="fas fa-user"></i> Information client</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="client_id">Client *</label>
+                            {% if clientPreselectionne is defined and clientPreselectionne == true %}
+                                <div class="client-info-card">
+                                    <div class="client-details">
+                                        <i class="fas fa-user-circle fa-2x client-icon"></i>
+                                        <div>
+                                            <strong class="client-name">{{ client.prenom }} {{ client.nom }}</strong>
+                                            <span class="client-email">{{ client.email }}</span>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="client_id" id="client_id" value="{{ client.id }}">
+                                </div>
+                            {% else %}
+                                <select name="client_id" id="client_id" class="form-control custom-select" required>
+                                    <option value="">Sélectionnez un client</option>
+                                    {% for client in clients %}
+                                        <option value="{{ client.id }}" {% if commande is defined and commande.client_id == client.id %}selected{% endif %}>
+                                            {{ client.prenom }} {{ client.nom }} ({{ client.email }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i> Sélectionnez le client qui passe la commande.
+                                </small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h4 class="card-subtitle"><i class="fas fa-leaf"></i> Plantes à commander</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="plantes-table">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th><i class="fas fa-leaf"></i> Plante</th>
+                                        <th><i class="fas fa-tag"></i> Prix</th>
+                                        <th><i class="fas fa-boxes"></i> Stock</th>
+                                        <th><i class="fas fa-sort-numeric-up"></i> Quantité</th>
+                                        <th><i class="fas fa-dollar-sign"></i> Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for plante in plantes %}
+                                        <tr>
+                                            <td>{{ plante.nom }}</td>
+                                            <td class="price-cell">{{ plante.prix|number_format(2, ',', ' ') }} $</td>
+                                            <td>
+                                                <span class="badge badge-{{ plante.stock > 10 ? 'success' : (plante.stock > 5 ? 'warning' : 'danger') }}">
+                                                    {{ plante.stock }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <input type="number" 
+                                                    name="plantes[{{ plante.id }}]" 
+                                                    class="form-control form-control-sm quantite-input" 
+                                                    min="0" 
+                                                    max="{{ plante.stock }}" 
+                                                    value="{% if plantesCommandees is defined and plantesCommandees[plante.id] is defined %}{{ plantesCommandees[plante.id] }}{% else %}0{% endif %}"
+                                                    data-prix="{{ plante.prix }}">
+                                            </td>
+                                            <td class="plante-total price-cell">0.00 $</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-active">
+                                        <th colspan="4" class="text-right">Total de la commande :</th>
+                                        <th id="commande-total" class="price-cell">0.00 $</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <input type="hidden" name="total" id="total-input" value="0">
+                    </div>
+                </div>
+                
+                <div id="debug-info" class="alert alert-info mt-3" style="display:none;">
+                    Info de débogage
+                </div>                <div class="form-actions">
+                    <button type="submit" id="submit-btn" class="btn btn-success btn-lg">
+                        <i class="fas fa-check-circle"></i> Enregistrer la commande
+                    </button>
+                    <a href="{{ BASE_URL }}/commandes" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-times-circle"></i> Annuler
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card bg-light mb-3">
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Conseil: Ajustez les quantités pour voir le total se mettre à jour automatiquement.
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    $(document).ready(function() {
+        // Fonction pour calculer les totaux
+        function calculerTotaux() {
+            let total = 0;
+            
+            $('.quantite-input').each(function() {
+                const quantite = parseInt($(this).val()) || 0;
+                const prix = parseFloat($(this).data('prix')) || 0;
+                const ligneTotal = quantite * prix;
+                const $row = $(this).closest('tr');
+                
+                // Mettre à jour le total de la ligne
+                $row.find('.plante-total').text(
+                    ligneTotal.toFixed(2).replace('.', ',') + ' $'
+                );
+                
+                // Surligner les lignes avec des quantités > 0
+                if (quantite > 0) {
+                    $row.addClass('table-success');
+                } else {
+                    $row.removeClass('table-success');
+                }
+                
+                total += ligneTotal;
+            });
+            
+            // Mettre à jour le total de la commande
+            $('#commande-total').text(total.toFixed(2).replace('.', ',') + ' $');
+            $('#total-input').val(total.toFixed(2));
+            
+            // Activer/désactiver le bouton de soumission selon si le total > 0
+            if (total > 0) {
+                $('#submit-btn').prop('disabled', false).removeClass('btn-secondary').addClass('btn-success');
+            } else {
+                $('#submit-btn').prop('disabled', true).removeClass('btn-success').addClass('btn-secondary');
+            }
+        }
+        
+        // Calculer les totaux au chargement
+        calculerTotaux();
+        
+        // Recalculer à chaque changement de quantité
+        $('.quantite-input').on('change', function() {
+            calculerTotaux();
+        });
+        
+        // Ajout d'une animation lors de la modification des quantités
+        $('.quantite-input').on('input', function() {
+            $(this).closest('tr').find('.plante-total').addClass('highlight-price');
+            setTimeout(function() {
+                $('.highlight-price').removeClass('highlight-price');
+            }, 500);
+        });
+        
+        // Mise en surbrillance lors du survol
+        $('#plantes-table tbody tr').hover(
+            function() {
+                $(this).addClass('row-hover');
+            },
+            function() {
+                $(this).removeClass('row-hover');
+            }
+        );
+    });
+</script>
+{% endblock %}

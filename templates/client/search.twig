@@ -1,0 +1,81 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}{{ pageTitle }} - Fleurs & Plantes{% endblock %}
+
+{% block content %}
+    <div class="breadcrumb">
+        <a href="{{ BASE_URL }}/"><i class="fas fa-home"></i> Accueil</a> &gt;
+        <a href="{{ BASE_URL }}/clients"><i class="fas fa-users"></i> Clients</a> &gt;
+        <span>Recherche</span>
+    </div>
+
+    <div class="page-header">
+        <h2><i class="fas fa-search"></i> {{ pageTitle }}</h2>
+        <div class="page-header-actions">
+            <a href="{{ BASE_URL }}/clients" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    </div>
+
+    <div class="filters">
+        <form action="{{ BASE_URL }}/client/search" method="GET" class="search-form">
+            <div class="form-group">
+                <input type="text" name="q" placeholder="Rechercher un client..." class="form-control" value="{{ keyword }}">
+                <button type="submit" class="btn btn-search"><i class="fas fa-search"></i></button>
+            </div>
+        </form>
+    </div>
+
+    <div class="search-results">
+        <h3 class="section-title"><i class="fas fa-list"></i> Résultats de recherche pour "{{ keyword }}"</h3>
+        <p>{{ clients|length }} client(s) trouvé(s)</p>
+    </div>
+
+    {% if clients|length > 0 %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Téléphone</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in clients %}
+                        <tr>
+                            <td>{{ client.id }}</td>
+                            <td><a href="{{ BASE_URL }}/client/{{ client.id }}" class="client-link">{{ client.prenom }} {{ client.nom }}</a></td>
+                            <td><a href="mailto:{{ client.email }}"><i class="fas fa-envelope"></i> {{ client.email }}</a></td>
+                            <td>
+                                {% if client.telephone %}
+                                    <a href="tel:{{ client.telephone }}"><i class="fas fa-phone"></i> {{ client.telephone }}</a>
+                                {% else %}
+                                    <span class="text-muted"><em>Non renseigné</em></span>
+                                {% endif %}
+                            </td>
+                            <td class="action-buttons">
+                                <a href="{{ BASE_URL }}/client/{{ client.id }}" class="btn btn-sm btn-info" title="Voir détails">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ BASE_URL }}/client/{{ client.id }}/edit" class="btn btn-sm btn-primary" title="Modifier">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ BASE_URL }}/client/{{ client.id }}/commande/create" class="btn btn-sm btn-success" title="Créer une commande">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Aucun client ne correspond à votre recherche "{{ keyword }}".
+        </div>
+    {% endif %}
+{% endblock %}

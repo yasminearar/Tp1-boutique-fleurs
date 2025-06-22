@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Boutique de Plantes{% endblock %}</title>    <link rel="stylesheet" href="{{ ASSETS_URL }}/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% block stylesheets %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    {% block navigation %}
+    <nav class="main-nav">
+        <div class="nav-container">            <div class="nav-brand">
+                <a href="{{ BASE_URL }}/">Boutique de Plantes</a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="{{ BASE_URL }}/"><i class="fas fa-home"></i> Accueil</a></li>
+                <li><a href="{{ BASE_URL }}/plantes"><i class="fas fa-leaf"></i> Plantes</a></li>
+                <li><a href="{{ BASE_URL }}/categories"><i class="fas fa-tags"></i> Catégories</a></li>
+                <li><a href="{{ BASE_URL }}/clients"><i class="fas fa-users"></i> Clients</a></li>
+                <li><a href="{{ BASE_URL }}/commandes"><i class="fas fa-shopping-cart"></i> Commandes</a></li>
+            </ul>
+        </div>
+    </nav>
+    {% endblock %}
+    
+    <div class="container">
+        {% if flash_messages is defined and flash_messages|length > 0 %}
+            <div class="flash-messages">
+                {% for message in flash_messages %}
+                    <div class="alert alert-{{ message.type }}">
+                        <i class="fas fa-{% if message.type == 'success' %}check-circle{% elseif message.type == 'error' %}exclamation-circle{% elseif message.type == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                        {{ message.message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>    <footer class="footer-simple">
+        <div class="footer-links-center">
+            <a href="{{ BASE_URL }}/"><i class="fas fa-home"></i> Accueil</a>
+            <a href="#"><i class="fas fa-info-circle"></i> À propos</a>
+            <a href="#"><i class="fas fa-envelope"></i> Contact</a>
+        </div>
+        <p class="footer-copyright-center">© {{ "now"|date("Y") }} Boutique de Plantes - Tous droits réservés</p>
+        <p class="footer-admin-note">Interface d'administration</p>
+    </footer>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    {% block javascripts %}{% endblock %}
+    
+    <script>
+        // Fermeture automatique des messages flash après 5 secondes
+        $(document).ready(function() {
+            setTimeout(function() {
+                $('.flash-message').fadeOut('slow');
+            }, 5000);
+            
+            // Prévisualisation d'image pour les formulaires
+            $('#image').on('change', function() {
+                let imageValue = $(this).val();
+                if (imageValue) {
+                    // Vérifier si l'élément de prévisualisation existe déjà
+                    if ($('.current-image').length === 0) {
+                        // Créer un nouvel élément de prévisualisation
+                        let previewHtml = `
+                            <div class="current-image">
+                                <p>Aperçu de l'image :</p>
+                                <div class="image-preview">
+                                    <img src="{{ ASSETS_URL }}/images/plantes/${imageValue}" alt="Prévisualisation">
+                                </div>
+                            </div>
+                        `;
+                        $('.image-upload-container').append(previewHtml);
+                    } else {
+                        // Mettre à jour l'image existante
+                        $('.image-preview img').attr('src', `{{ ASSETS_URL }}/images/plantes/${imageValue}`);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

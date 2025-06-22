@@ -1,0 +1,86 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}Nos plantes - Fleurs & Plantes{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h2><i class="fas fa-seedling"></i> Nos plantes</h2>
+        <a href="{{ BASE_URL }}/plante/create" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter une plante</a>
+    </div>    <div class="filters">
+        <div class="row">
+            <div class="col-md-12">
+                <h4 class="filter-section-title"><i class="fas fa-filter"></i> Catégories</h4>
+                <div class="category-filter">
+                    <select name="categorie" onchange="window.location.href=this.value" class="form-control category-select">
+                        <option value="" disabled {% if not current_categorie %}selected{% endif %}>Sélectionner une catégorie</option>
+                        <option value="{{ BASE_URL }}/plantes" {% if current_categorie == 0 %}selected{% endif %}>Toutes les catégories</option>
+                        {% for cat in categories ?? [] %}
+                            <option value="{{ BASE_URL }}/plantes?categorie={{ cat.id }}" 
+                                    {% if current_categorie == cat.id %}selected{% endif %}>
+                                {{ cat.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        {% if current_categorie %}
+            <div class="active-filters">
+                <span class="active-filter">
+                    <i class="fas fa-tag"></i> Catégorie: 
+                    {% for cat in categories ?? [] %}
+                        {% if cat.id == current_categorie %}
+                            {{ cat.nom }}
+                        {% endif %}
+                    {% endfor %}
+                    <a href="{{ BASE_URL }}/plantes" class="remove-filter">
+                        <i class="fas fa-times-circle"></i>
+                    </a>
+                </span>
+                
+                <a href="{{ BASE_URL }}/plantes" class="clear-filters">Effacer tous les filtres</a>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if plantes is empty %}
+        <div class="alert alert-info">
+            Aucune plante trouvée.
+        </div>
+    {% else %}
+        <div class="plantes-grid">
+            {% for plante in plantes %}                <div class="plante-card">
+                    <div class="plante-image">
+                        {% if plante.image_url %}
+                            <img src="{{ ASSETS_URL }}/images/plantes/{{ plante.image_url }}" alt="{{ plante.nom }}">
+                        {% elseif plante.image %}
+                            <img src="{{ ASSETS_URL }}/images/plantes/{{ plante.image }}" alt="{{ plante.nom }}">
+                        {% else %}
+                            <img src="{{ ASSETS_URL }}/images/plantes/placeholder.jpg" alt="Pas d'image">
+                        {% endif %}
+                    </div>
+                    <div class="plante-content">                        <h3>{{ plante.nom }}</h3>
+                        <p class="plante-category">{{ plante.categorie_nom ?? 'Non catégorisé' }}</p>
+                        <p class="plante-price">{{ plante.prix }} $</p>
+                        <div class="plante-stock {% if plante.stock <= 0 %}out-of-stock{% endif %}">
+                            {% if plante.stock > 0 %}
+                                Stock: {{ plante.stock }}
+                            {% else %}
+                                Rupture de stock
+                            {% endif %}
+                        </div>
+                        <div class="plante-actions">
+                            <a href="{{ BASE_URL }}/plante/{{ plante.id }}" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-eye"></i> Détails
+                            </a>
+                            <a href="{{ BASE_URL }}/plante/{{ plante.id }}/edit" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}
