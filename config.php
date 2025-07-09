@@ -6,8 +6,8 @@ define('SITE_NAME', 'Boutique de Plantes');
 define('DEBUG', false);
 
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'e2496039');
-define('DB_USER', 'e2496039');
-define('DB_PASS', 'mYCAKIuYBiykg9CwMp06');
+define('DB_NAME', 'boutique_plantes');
+define('DB_USER', 'root');
+define('DB_PASS', '');
 define('DB_CHARSET', 'utf8mb4');
 ?>

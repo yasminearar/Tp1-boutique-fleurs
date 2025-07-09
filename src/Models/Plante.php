@@ -13,7 +13,7 @@ class Plante extends CRUD {
     /**
      * Colonnes autorisées pour l'insertion/mise à jour
      */
-    protected $fillable = ['nom', 'description', 'prix', 'image', 'id_categorie', 'stock', 'couleur', 'taille', 'date_ajout'];
+    protected $fillable = ['nom', 'description', 'prix', 'image_url', 'id_categorie', 'stock', 'taille', 'exposition'];
       /**
      * Récupère la catégorie associée à cette plante
      * 

@@ -51,30 +51,16 @@
                     <div class="card-body">
                         <div class="form-group">
                             <label for="client_id">Client *</label>
-                            {% if clientPreselectionne is defined and clientPreselectionne == true %}
-                                <div class="client-info-card">
-                                    <div class="client-details">
-                                        <i class="fas fa-user-circle fa-2x client-icon"></i>
-                                        <div>
-                                            <strong class="client-name">{{ client.prenom }} {{ client.nom }}</strong>
-                                            <span class="client-email">{{ client.email }}</span>
-                                        </div>
+                            <div class="client-info-card">
+                                <div class="client-details">
+                                    <i class="fas fa-user-circle fa-2x client-icon"></i>
+                                    <div>
+                                        <strong class="client-name">{{ client.prenom }} {{ client.nom }}</strong>
+                                        <span class="client-email">{{ client.email }}</span>
                                     </div>
-                                    <input type="hidden" name="client_id" id="client_id" value="{{ client.id }}">
                                 </div>
-                            {% else %}
-                                <select name="client_id" id="client_id" class="form-control custom-select" required>
-                                    <option value="">Sélectionnez un client</option>
-                                    {% for client in clients %}
-                                        <option value="{{ client.id }}" {% if commande is defined and commande.client_id == client.id %}selected{% endif %}>
-                                            {{ client.prenom }} {{ client.nom }} ({{ client.email }})
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <small class="form-text text-muted">
-                                    <i class="fas fa-info-circle"></i> Sélectionnez le client qui passe la commande.
-                                </small>
-                            {% endif %}
+                                <input type="hidden" name="client_id" id="client_id" value="{{ client.id }}">
+                            </div>
                         </div>
                     </div>
                 </div>

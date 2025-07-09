@@ -12,7 +12,8 @@ class CommandeController extends Controller {
      */
     public function index() {
         // Récupérer toutes les commandes avec les détails des clients
-        $commandes = Commande::withClientDetails();
+        $commande = new Commande();
+        $commandes = $commande->withClientDetails();
         
         $this->display('commande/index', [
             'pageTitle' => 'Liste des commandes',
@@ -26,18 +27,22 @@ class CommandeController extends Controller {
      * @param int $id ID de la commande
      */
     public function show($id) {
-        $commandeData = Commande::find($id);
+        $commande = new Commande();
+        $commandeData = $commande->selectId($id);
         
         if (!$commandeData) {
             $this->error(404, 'Commande non trouvée');
             return;
         }
-          // Récupérer le client de cette commande
-        $client = Commande::getClient($id);
+
+        // Récupérer le client de cette commande
+        $client = $commande->getClient($id);
         
         // Récupérer les détails de la commande (plantes commandées)
-        $details = CommandeDetail::getDetailsWithPlantes($id);
-          $this->display('commande/show', [
+        $commandeDetail = new CommandeDetail();
+        $details = $commandeDetail->getDetailsWithPlantes($id);
+
+        $this->display('commande/show', [
             'pageTitle' => 'Commande #' . $id,
             'details' => $details,
             'plantes_commande' => $details,  // Ajout de cette ligne pour compatibilité avec le template
@@ -47,19 +52,11 @@ class CommandeController extends Controller {
     }
     
     /**
-     * Affiche le formulaire de création d'une commande
+     * Redirige vers la page des clients pour créer une commande
      */
     public function create() {
-        // Récupérer tous les clients pour le sélecteur
-        $clients = Client::all();
-        // Récupérer les plantes en stock
-        $plantes = Plante::inStock();
-        
-        $this->display('commande/create', [
-            'pageTitle' => 'Nouvelle commande',
-            'clients' => $clients,
-            'plantes' => $plantes
-        ]);
+        // Rediriger vers la page des clients car la création de commande se fait à partir d'un client
+        $this->redirect('/clients?message=Sélectionnez un client pour créer une commande');
     }    /**
      * Affiche le formulaire de création d'une commande pour un client spécifique
      * 
@@ -67,21 +64,22 @@ class CommandeController extends Controller {
      */
     public function createForClient($clientId) {
         // Récupérer le client spécifique
-        $client = Client::find($clientId);
+        $clientModel = new Client();
+        $clientData = $clientModel->selectId($clientId);
         
-        if (!$client) {
+        if (!$clientData) {
             $this->error(404, 'Client non trouvé');
             return;
         }
         
         // Récupérer les plantes en stock
-        $plantes = Plante::inStock();
+        $plante = new Plante();
+        $plantes = $plante->inStock();
         
         $this->display('commande/create', [
-            'pageTitle' => 'Nouvelle commande pour ' . $client['prenom'] . ' ' . $client['nom'],
-            'client' => $client,
-            'plantes' => $plantes,
-            'clientPreselectionne' => true
+            'pageTitle' => 'Nouvelle commande pour ' . $clientData['prenom'] . ' ' . $clientData['nom'],
+            'client' => $clientData,
+            'plantes' => $plantes
         ]);
     }
         /**
@@ -110,14 +108,13 @@ class CommandeController extends Controller {
         
         // S'il y a des erreurs, réafficher le formulaire avec les erreurs
         if (!empty($errors)) {
-            $clients = Client::all();
-            $plantes = Plante::inStock();
+            $clientModel = new Client();
+            $client = $clientModel->selectId($clientId);
+            $plante = new Plante();
+            $plantes = $plante->inStock();
             $this->display('commande/create', [
-                'pageTitle' => 'Nouvelle commande',
-                'commande' => [
-                    'client_id' => $clientId
-                ],
-                'clients' => $clients,
+                'pageTitle' => 'Nouvelle commande pour ' . ($client ? $client['prenom'] . ' ' . $client['nom'] : 'Client'),
+                'client' => $client,
                 'plantes' => $plantes,
                 'plantesCommandees' => $plantesCommandees,
                 'errors' => $errors
@@ -134,7 +131,8 @@ class CommandeController extends Controller {
         ];
         
         // Créer la commande
-        $commandeId = Commande::create($dataToInsert);
+        $commandeModel = new Commande();
+        $commandeId = $commandeModel->insert($dataToInsert);
         
         if ($commandeId) {
             // Ajouter les détails de la commande
@@ -144,14 +142,13 @@ class CommandeController extends Controller {
             $this->redirect('/commandes');
         } else {
             $this->addFlashMessage('Erreur lors de la création de la commande', 'error');
-            $clients = Client::all();
-            $plantes = Plante::inStock();
+            $clientModel = new Client();
+            $client = $clientModel->selectId($clientId);
+            $plante = new Plante();
+            $plantes = $plante->inStock();
             $this->display('commande/create', [
-                'pageTitle' => 'Nouvelle commande',
-                'commande' => [
-                    'client_id' => $clientId
-                ],
-                'clients' => $clients,
+                'pageTitle' => 'Nouvelle commande pour ' . ($client ? $client['prenom'] . ' ' . $client['nom'] : 'Client'),
+                'client' => $client,
                 'plantes' => $plantes,
                 'plantesCommandees' => $plantesCommandees,
                 'errors' => ['general' => 'Erreur lors de la création de la commande.']
@@ -172,7 +169,8 @@ class CommandeController extends Controller {
         if (empty($data['id_client'])) {
             $errors['client_id'] = 'Veuillez sélectionner un client.';
         } else {
-            $client = Client::find($data['id_client']);
+            $clientModel = new Client();
+            $client = $clientModel->selectId($data['id_client']);
             if (!$client) {
                 $errors['client_id'] = 'Le client sélectionné n\'existe pas.';
             }
@@ -203,16 +201,19 @@ class CommandeController extends Controller {
      * @param array $plantes Tableau associatif des plantes commandées [planteId => quantite]
      * @return void
      */    private function saveCommandeDetails(int $commandeId, array $plantes): void {
+        $planteModel = new Plante();
+        $commandeDetailModel = new CommandeDetail();
+        
         foreach ($plantes as $planteId => $quantite) {
             $planteId = (int)$planteId;
             $quantite = (int)$quantite;
             
             if ($quantite > 0) {
                 // Récupérer le prix de la plante
-                $prix = Plante::getPrix($planteId);
+                $prix = $planteModel->getPrix($planteId);
                 if ($prix) {
                     // Ajouter le détail
-                    $detailId = CommandeDetail::ajouterDetail(
+                    $detailId = $commandeDetailModel->ajouterDetail(
                         $commandeId,
                         $planteId,
                         $quantite,
@@ -221,7 +222,7 @@ class CommandeController extends Controller {
                     
                     // Mettre à jour le stock
                     if ($detailId) {
-                        Plante::decreaseStock($planteId, $quantite);
+                        $planteModel->decreaseStock($planteId, $quantite);
                     }
                 }
             }
@@ -238,7 +239,8 @@ class CommandeController extends Controller {
             return;
         }
         
-        $commandeData = Commande::find($id);
+        $commande = new Commande();
+        $commandeData = $commande->selectId($id);
         
         if (!$commandeData) {
             $this->error(404, 'Commande non trouvée');
@@ -246,7 +248,7 @@ class CommandeController extends Controller {
         }
         
         $statut = $this->postParam('statut');
-        $result = Commande::updateStatut($id, $statut);
+        $result = $commande->updateStatut($id, $statut);
         
         if ($result) {
             $this->addFlashMessage('Statut de la commande mis à jour avec succès', 'success');
@@ -263,7 +265,8 @@ class CommandeController extends Controller {
      * @param int $id ID de la commande
      */
     public function edit($id) {
-        $commandeData = Commande::find($id);
+        $commande = new Commande();
+        $commandeData = $commande->selectId($id);
         
         if (!$commandeData) {
             $this->error(404, 'Commande non trouvée');
@@ -271,10 +274,11 @@ class CommandeController extends Controller {
         }
         
         // Récupérer le client de cette commande
-        $client = Commande::getClient($id);
+        $client = $commande->getClient($id);
         
         // Récupérer les détails de la commande (plantes commandées)
-        $details = CommandeDetail::getDetailsWithPlantes($id);
+        $commandeDetail = new CommandeDetail();
+        $details = $commandeDetail->getDetailsWithPlantes($id);
         
         $this->display('commande/edit', [
             'pageTitle' => 'Modifier la commande #' . $id,
@@ -295,7 +299,8 @@ class CommandeController extends Controller {
             return;
         }
         
-        $commandeData = Commande::find($id);
+        $commande = new Commande();
+        $commandeData = $commande->selectId($id);
         
         if (!$commandeData) {
             $this->error(404, 'Commande non trouvée');
@@ -317,7 +322,7 @@ class CommandeController extends Controller {
         }
         
         // Mettre à jour la commande
-        $result = Commande::update($id, $dataToUpdate);
+        $result = $commande->update($dataToUpdate, $id);
         
         if ($result) {
             $this->addFlashMessage('Commande mise à jour avec succès', 'success');
@@ -326,8 +331,9 @@ class CommandeController extends Controller {
             $this->addFlashMessage('Erreur lors de la mise à jour de la commande', 'error');
             
             // Récupérer le client et les détails pour réafficher le formulaire
-            $client = Commande::getClient($id);
-            $details = CommandeDetail::getDetailsWithPlantes($id);
+            $client = $commande->getClient($id);
+            $commandeDetail = new CommandeDetail();
+            $details = $commandeDetail->getDetailsWithPlantes($id);
             
             $this->display('commande/edit', [
                 'pageTitle' => 'Modifier la commande #' . $id,

@@ -9,7 +9,8 @@ class ClientController extends Controller {
      */
     public function index() {
         // Récupérer tous les clients avec le nombre de commandes
-        $clients = Client::withCommandCount();
+        $client = new Client();
+        $clients = $client->withCommandCount();
         
         $this->display('client/index', [
             'pageTitle' => 'Liste des clients',
@@ -23,7 +24,8 @@ class ClientController extends Controller {
      * @param int $id ID du client
      */
     public function show($id) {
-        $clientData = Client::find($id);
+        $client = new Client();
+        $clientData = $client->selectId($id);
         
         if (!$clientData) {
             $this->error(404, 'Client non trouvé');
@@ -31,10 +33,10 @@ class ClientController extends Controller {
         }
         
         // Récupérer les commandes de ce client
-        $commandes = Client::getCommandesByClient($id);
+        $commandes = $client->getCommandesByClient($id);
         
         $this->display('client/show', [
-            'pageTitle' => 'Client: ' . Client::getNomComplet($id),
+            'pageTitle' => 'Client: ' . $client->getNomComplet($id),
             'client' => $clientData,
             'commandes' => $commandes
         ]);
@@ -67,7 +69,8 @@ class ClientController extends Controller {
         ];
         
         // Validation des données
-        $errors = Client::validate($data);
+        $client = new Client();
+        $errors = $client->validate($data);
         
         if (!empty($errors)) {
             $this->display('client/create', [
@@ -78,7 +81,7 @@ class ClientController extends Controller {
             return;
         }
         
-        $id = Client::create($data);
+        $id = $client->insert($data);
         
         if ($id) {
             $this->addFlashMessage('Client créé avec succès', 'success');
@@ -98,7 +101,8 @@ class ClientController extends Controller {
      * @param int $id ID du client
      */
     public function edit($id) {
-        $clientData = Client::find($id);
+        $client = new Client();
+        $clientData = $client->selectId($id);
         
         if (!$clientData) {
             $this->error(404, 'Client non trouvé');
@@ -106,7 +110,7 @@ class ClientController extends Controller {
         }
         
         $this->display('client/edit', [
-            'pageTitle' => 'Modifier le client: ' . Client::getNomComplet($id),
+            'pageTitle' => 'Modifier le client: ' . $client->getNomComplet($id),
             'client' => $clientData
         ]);
     }
@@ -136,7 +140,9 @@ class ClientController extends Controller {
             'telephone' => $this->postParam('telephone')
         ];
         
-        // Validation des données        $errors = Client::validate($data);
+        // Validation des données
+        $client = new Client();
+        $errors = $client->validate($data);
         
         if (!empty($errors)) {
             $this->display('client/edit', [
@@ -151,7 +157,7 @@ class ClientController extends Controller {
         $updateData = $data;
         unset($updateData['id']); // Supprimer l'ID pour éviter les conflits
         
-        $result = Client::update($id, $updateData);
+        $result = $client->update($updateData, $id);
         
         if ($result) {
             $this->addFlashMessage('Client modifié avec succès', 'success');
@@ -171,7 +177,8 @@ class ClientController extends Controller {
      * @param int $id ID du client
      */
     public function delete($id) {
-        $clientData = Client::find($id);
+        $client = new Client();
+        $clientData = $client->selectId($id);
         
         if (!$clientData) {
             $this->error(404, 'Client non trouvé');
@@ -179,7 +186,7 @@ class ClientController extends Controller {
         }
         
         // Vérifier si le client a des commandes
-        $commandes = Client::getCommandesByClient($id);
+        $commandes = $client->getCommandesByClient($id);
         
         if (count($commandes) > 0) {
             $this->addFlashMessage('Impossible de supprimer ce client car il a des commandes associées', 'error');
@@ -187,7 +194,7 @@ class ClientController extends Controller {
             return;
         }
         
-        $result = Client::delete($id);
+        $result = $client->delete($id);
         
         if ($result) {
             $this->addFlashMessage('Client supprimé avec succès', 'success');
@@ -209,7 +216,8 @@ class ClientController extends Controller {
             return;
         }
         
-        $clients = Client::search($keyword);
+        $client = new Client();
+        $clients = $client->search($keyword);
         
         $this->display('client/search', [
             'pageTitle' => 'Résultats de recherche pour "' . htmlspecialchars($keyword) . '"',

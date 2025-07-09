@@ -8,7 +8,12 @@ class Client extends CRUD {
     /**
      * @var string Nom de la table associée au modèle
      */
-    protected static string $table = 'clients';
+    protected $table = 'clients';
+    
+    /**
+     * Colonnes autorisées pour l'insertion/mise à jour
+     */
+    protected $fillable = ['nom', 'prenom', 'email', 'adresse', 'telephone'];
     
     /**
      * Récupère toutes les commandes d'un client
@@ -16,8 +21,11 @@ class Client extends CRUD {
      * @param int $clientId ID du client
      * @return array Liste des commandes du client
      */
-    public static function getCommandesByClient(int $clientId): array {
-        return Commande::where(['id_client' => $clientId]);
+    public function getCommandesByClient(int $clientId): array {
+        $sql = "SELECT * FROM commandes WHERE id_client = :clientId ORDER BY id DESC";
+        $stmt = $this->prepare($sql);
+        $stmt->execute(['clientId' => $clientId]);
+        return $stmt->fetchAll();
     }
     
     /**
@@ -26,7 +34,7 @@ class Client extends CRUD {
      * @param array $data Données à valider
      * @return array Erreurs de validation (vide si pas d'erreurs)
      */
-    public static function validate(array $data): array {
+    public function validate(array $data): array {
         $errors = [];
         
         // Validation du nom
@@ -54,8 +62,7 @@ class Client extends CRUD {
             // Vérifier si l'email existe déjà (sauf si c'est le même client)
             $clientId = $data['id'] ?? 0;
             
-            self::initDb();
-            $stmt = self::$pdo->prepare("SELECT id FROM " . self::$table . " WHERE email = :email AND id != :id");
+            $stmt = $this->prepare("SELECT id FROM $this->table WHERE email = :email AND id != :id");
             $stmt->execute(['email' => $data['email'], 'id' => $clientId]);
             
             if ($stmt->rowCount() > 0) {
@@ -69,17 +76,15 @@ class Client extends CRUD {
         
         return $errors;
     }
-      /**
+    /**
      * Récupère le nom complet du client
      * 
      * @param int $clientId ID du client
      * @return string Nom complet du client
      */
-    public static function getNomComplet(int $clientId): string {
-        self::initDb();
-        
-        $sql = "SELECT prenom, nom FROM " . self::$table . " WHERE id = :id";
-        $stmt = self::$pdo->prepare($sql);
+    public function getNomComplet(int $clientId): string {
+        $sql = "SELECT prenom, nom FROM $this->table WHERE id = :id";
+        $stmt = $this->prepare($sql);
         $stmt->execute(['id' => $clientId]);
         $client = $stmt->fetch();
         
@@ -96,16 +101,14 @@ class Client extends CRUD {
      * @param string $keyword Mot-clé de recherche
      * @return array Résultats de la recherche
      */
-    public static function search(string $keyword): array {
-        self::initDb();
-        
-        $sql = "SELECT * FROM " . self::$table . " 
+    public function search(string $keyword): array {
+        $sql = "SELECT * FROM $this->table 
                 WHERE nom LIKE :keyword 
                 OR prenom LIKE :keyword 
                 OR email LIKE :keyword
                 ORDER BY nom ASC, prenom ASC";
                 
-        $stmt = self::$pdo->prepare($sql);
+        $stmt = $this->prepare($sql);
         $stmt->execute(['keyword' => "%$keyword%"]);
         
         return $stmt->fetchAll();
@@ -116,16 +119,14 @@ class Client extends CRUD {
      * 
      * @return array Clients avec le compteur de commandes
      */
-    public static function withCommandCount(): array {
-        self::initDb();
-        
+    public function withCommandCount(): array {
         $sql = "SELECT c.*, COUNT(co.id) as nombre_commandes 
-                FROM " . self::$table . " c 
+                FROM $this->table c 
                 LEFT JOIN commandes co ON c.id = co.id_client 
                 GROUP BY c.id 
                 ORDER BY c.nom ASC, c.prenom ASC";
         
-        $stmt = self::$pdo->query($sql);
+        $stmt = $this->query($sql);
         return $stmt->fetchAll();
     }
     
@@ -134,15 +135,13 @@ class Client extends CRUD {
      * 
      * @return array Clients avec au moins une commande
      */
-    public static function withOrders(): array {
-        self::initDb();
-        
+    public function withOrders(): array {
         $sql = "SELECT DISTINCT c.* 
-                FROM " . self::$table . " c 
+                FROM $this->table c 
                 INNER JOIN commandes co ON c.id = co.id_client 
                 ORDER BY c.nom ASC, c.prenom ASC";
         
-        $stmt = self::$pdo->query($sql);
+        $stmt = $this->query($sql);
         return $stmt->fetchAll();
     }
 }

@@ -6,9 +6,14 @@ namespace App\Models;
  */
 class CommandeDetail extends CRUD {
     /**
-     * @var string Nom de la table associée au modèle
+     * Table associée au modèle
      */
-    protected static string $table = 'commande_details';
+    protected $table = 'commande_details';
+    
+    /**
+     * Colonnes autorisées pour l'insertion/mise à jour
+     */
+    protected $fillable = ['id_commande', 'id_plante', 'quantite', 'prix_unitaire'];
     
     /**
      * Crée un nouveau détail de commande
@@ -19,8 +24,8 @@ class CommandeDetail extends CRUD {
      * @param float $prixUnitaire Prix unitaire au moment de la commande
      * @return int ID du détail créé
      */
-    public static function ajouterDetail(int $commandeId, int $planteId, int $quantite, float $prixUnitaire): int {
-        return self::create([
+    public function ajouterDetail(int $commandeId, int $planteId, int $quantite, float $prixUnitaire): int {
+        return $this->insert([
             'id_commande' => $commandeId,
             'id_plante' => $planteId,
             'quantite' => $quantite,
@@ -34,8 +39,11 @@ class CommandeDetail extends CRUD {
      * @param int $commandeId ID de la commande
      * @return array Détails de la commande
      */
-    public static function getDetailsByCommande(int $commandeId): array {
-        return self::where(['id_commande' => $commandeId]);
+    public function getDetailsByCommande(int $commandeId): array {
+        $sql = "SELECT * FROM $this->table WHERE id_commande = :id_commande";
+        $stmt = $this->prepare($sql);
+        $stmt->execute(['id_commande' => $commandeId]);
+        return $stmt->fetchAll();
     }
     
     /**
@@ -43,17 +51,16 @@ class CommandeDetail extends CRUD {
      * 
      * @param int $commandeId ID de la commande
      * @return array Détails de la commande avec informations des plantes
-     */    public static function getDetailsWithPlantes(int $commandeId): array {
-        self::initDb();
-        
+     */
+    public function getDetailsWithPlantes(int $commandeId): array {
         $sql = "SELECT cd.*, p.nom, p.image_url, p.description, c.nom as categorie_nom 
-                FROM commande_details cd
+                FROM $this->table cd
                 JOIN plantes p ON cd.id_plante = p.id
                 LEFT JOIN categories c ON p.id_categorie = c.id
                 WHERE cd.id_commande = :id_commande
                 ORDER BY cd.id ASC";
                 
-        $stmt = self::$pdo->prepare($sql);
+        $stmt = $this->prepare($sql);
         $stmt->execute(['id_commande' => $commandeId]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
@@ -64,11 +71,9 @@ class CommandeDetail extends CRUD {
      * @param int $commandeId ID de la commande
      * @return bool Succès de l'opération
      */
-    public static function deleteByCommandeId(int $commandeId): bool {
-        self::initDb();
-        
-        $sql = "DELETE FROM " . self::$table . " WHERE id_commande = :id_commande";
-        $stmt = self::$pdo->prepare($sql);
+    public function deleteByCommandeId(int $commandeId): bool {
+        $sql = "DELETE FROM $this->table WHERE id_commande = :id_commande";
+        $stmt = $this->prepare($sql);
         return $stmt->execute(['id_commande' => $commandeId]);
     }
 }

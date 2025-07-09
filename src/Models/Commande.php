@@ -6,9 +6,14 @@ namespace App\Models;
  */
 class Commande extends CRUD {
     /**
-     * @var string Nom de la table associée au modèle
+     * Table associée au modèle
      */
-    protected static string $table = 'commandes';
+    protected $table = 'commandes';
+    
+    /**
+     * Colonnes autorisées pour l'insertion/mise à jour
+     */
+    protected $fillable = ['id_client', 'date_commande', 'statut', 'total'];
     
     /**
      * Liste des statuts possibles pour une commande
@@ -20,17 +25,15 @@ class Commande extends CRUD {
         'expédiée' => 'Expédiée',
         'livrée' => 'Livrée'
     ];
-      /**
+    /**
      * Récupère le client associé à cette commande
      * 
      * @param int $commandeId ID de la commande
      * @return array|false Client associé ou false si non trouvé
      */
-    public static function getClient(int $commandeId) {
-        self::initDb();
-        
-        $sql = "SELECT id_client FROM " . self::$table . " WHERE id = :id";
-        $stmt = self::$pdo->prepare($sql);
+    public function getClient(int $commandeId) {
+        $sql = "SELECT id_client FROM $this->table WHERE id = :id";
+        $stmt = $this->prepare($sql);
         $stmt->execute(['id' => $commandeId]);
         $commande = $stmt->fetch();
         
@@ -38,7 +41,8 @@ class Commande extends CRUD {
             return false;
         }
         
-        return Client::find($commande['id_client']);
+        $client = new Client();
+        return $client->selectId($commande['id_client']);
     }
     
     /**
@@ -46,14 +50,12 @@ class Commande extends CRUD {
      * 
      * @return array Liste des commandes avec les détails du client
      */
-    public static function withClients(): array {
-        self::initDb();
-        
+    public function withClients(): array {
         $sql = "SELECT c.*, cl.nom as client_nom, cl.prenom as client_prenom, cl.email as client_email 
-                FROM " . self::$table . " c 
+                FROM $this->table c 
                 LEFT JOIN clients cl ON c.id_client = cl.id";
         
-        $stmt = self::$pdo->query($sql);
+        $stmt = $this->query($sql);
         return $stmt->fetchAll();
     }
     
@@ -63,8 +65,10 @@ class Commande extends CRUD {
      * @param array $data Données à valider
      * @return array Erreurs de validation (vide si pas d'erreurs)
      */
-    public static function validate(array $data): array {
-        $errors = [];        // Validation de l'ID client (accepte 'client_id' ou 'id_client')
+    public function validate(array $data): array {
+        $errors = [];
+
+        // Validation de l'ID client (accepte 'client_id' ou 'id_client')
         if (!empty($data['client_id'])) {
             $clientId = $data['client_id'];
         } elseif (!empty($data['id_client'])) {
@@ -76,12 +80,14 @@ class Commande extends CRUD {
         if (empty($clientId)) {
             $errors['client_id'] = "L'identifiant du client est obligatoire.";
         } else {
-            $client = Client::find($clientId);
-            if (!$client) {
+            $client = new Client();
+            $clientData = $client->selectId($clientId);
+            if (!$clientData) {
                 $errors['client_id'] = "Le client sélectionné n'existe pas.";
             }
         }
-          // Validation du statut
+
+        // Validation du statut
         if (!empty($data['statut']) && !array_key_exists($data['statut'], self::STATUTS)) {
             $errors['statut'] = "Le statut sélectionné n'est pas valide.";
         }
@@ -95,11 +101,9 @@ class Commande extends CRUD {
      * @param string $statut Filtrer par statut (optionnel)
      * @return array Liste des commandes avec les détails du client
      */
-    public static function withClientDetails(string $statut = ''): array {
-        self::initDb();
-        
+    public function withClientDetails(string $statut = ''): array {
         $sql = "SELECT c.*, cl.nom as client_nom, cl.prenom as client_prenom, cl.email as client_email 
-                FROM " . self::$table . " c 
+                FROM $this->table c 
                 LEFT JOIN clients cl ON c.id_client = cl.id";
         
         // Ajouter le filtre de statut si demandé
@@ -109,7 +113,7 @@ class Commande extends CRUD {
         
         $sql .= " ORDER BY c.date_commande DESC";
         
-        $stmt = self::$pdo->prepare($sql);
+        $stmt = $this->prepare($sql);
         
         if (!empty($statut)) {
             $stmt->execute(['statut' => $statut]);
@@ -127,13 +131,13 @@ class Commande extends CRUD {
      * @param string $statut Nouveau statut
      * @return bool True si la mise à jour a réussi, false sinon
      */
-    public static function updateStatut(int $commandeId, string $statut): bool {
+    public function updateStatut(int $commandeId, string $statut): bool {
         // Vérifier que le statut est valide
         if (!array_key_exists($statut, self::STATUTS)) {
             return false;
         }
         
-        return self::update($commandeId, ['statut' => $statut]);
+        return $this->update(['statut' => $statut], $commandeId);
     }
   
     
@@ -143,15 +147,13 @@ class Commande extends CRUD {
      * @param int $limit Nombre de commandes à récupérer
      * @return array Commandes récentes
      */
-    public static function getRecent(int $limit = 5): array {
-        self::initDb();
-        
+    public function getRecent(int $limit = 5): array {
         $sql = "SELECT c.*, cl.nom as client_nom, cl.prenom as client_prenom 
-                FROM " . self::$table . " c 
+                FROM $this->table c 
                 LEFT JOIN clients cl ON c.id_client = cl.id 
                 ORDER BY c.date_commande DESC LIMIT :limit";
                 
-        $stmt = self::$pdo->prepare($sql);
+        $stmt = $this->prepare($sql);
         $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
         $stmt->execute();
         
