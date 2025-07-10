@@ -65,7 +65,7 @@ class PlanteController extends Controller {
     /**
      * Affiche le formulaire de création d'une plante
      */    public function create() {
-        // Récupérer toutes les catégories pour le menu déroulant
+        $this->requireAdmin();
         $categorieModel = new Categorie();
         $categories = $categorieModel->select();
         
@@ -77,7 +77,10 @@ class PlanteController extends Controller {
     
     /**
      * Traite la soumission du formulaire de création
-     */    public function store() {
+     */    
+    public function store() {
+        $this->requireAdmin();
+        
         if (!$this->isPost()) {
             $this->redirect('/plantes');
             return;
@@ -88,11 +91,38 @@ class PlanteController extends Controller {
             'description' => $this->postParam('description'),
             'prix' => (float) $this->postParam('prix'),
             'id_categorie' => (int) $this->postParam('id_categorie'),
-            'image_url' => $this->postParam('image'),
             'stock' => (int) $this->postParam('stock')
         ];
-        
-        // Validation des données
+
+        $imageFileName = $this->postParam('image');
+
+        if (isset($_POST['use_existing_image']) && $_POST['use_existing_image'] && !empty($imageFileName)) {
+            $data['image_url'] = $imageFileName;
+        }
+
+        elseif (isset($_FILES['image_upload']) && $_FILES['image_upload']['error'] !== UPLOAD_ERR_NO_FILE) {
+
+            $uploadDir = ROOT_DIR . '/public/images/plantes/uploads/';
+            $uploader = new \App\Utils\FileUploader($uploadDir);
+
+            $slug = $this->slugify($data['nom']);
+            $uniqueFileName = $slug . '_' . uniqid();
+
+            if ($uploader->upload($_FILES['image_upload'], $uniqueFileName)) {
+                $data['image_url'] = 'uploads/' . $uploader->getUploadedFileName();
+            } else {
+                $categorieModel = new Categorie();
+                $categories = $categorieModel->select();
+                $this->display('plante/create', [
+                    'pageTitle' => 'Ajouter une plante',
+                    'plante' => $data,
+                    'categories' => $categories,
+                    'errors' => $uploader->getErrors()
+                ]);
+                return;
+            }
+        }
+
         $plante = new Plante();
         $errors = $plante->validate($data);
         
@@ -129,7 +159,9 @@ class PlanteController extends Controller {
      * Affiche le formulaire d'édition
      * 
      * @param int $id ID de la plante
-     */    public function edit($id) {        
+     */
+    public function edit($id) {
+        $this->requireAdmin();
         $plante = new Plante();
         $planteData = $plante->selectId($id);
         
@@ -137,12 +169,10 @@ class PlanteController extends Controller {
             $this->error(404, 'Plante non trouvée');
             return;
         }
-        
-        // Récupérer toutes les catégories pour le menu déroulant
+
         $categorieModel = new Categorie();
         $categories = $categorieModel->select();
-        
-        // Rendre compatible le nom du champ image avec les templates
+
         if (isset($planteData['image_url'])) {
             $planteData['image'] = $planteData['image_url'];
         }
@@ -158,7 +188,10 @@ class PlanteController extends Controller {
      * Traite la soumission du formulaire d'édition
      * 
      * @param int $id ID de la plante
-     */    public function update($id) {
+     */    
+    public function update($id) {
+        $this->requireAdmin();
+        
         if (!$this->isPost()) {
             $this->redirect('/plantes');
             return;
@@ -169,11 +202,48 @@ class PlanteController extends Controller {
             'description' => $this->postParam('description'),
             'prix' => (float) $this->postParam('prix'),
             'id_categorie' => (int) $this->postParam('id_categorie'),
-            'image_url' => $this->postParam('image'),
             'stock' => (int) $this->postParam('stock')
         ];
-        
-        // Validation des données
+
+        $currentImage = $this->postParam('current_image');
+        $keepCurrentImage = isset($_POST['keep_current_image']) && $_POST['keep_current_image'];
+        $useExistingImage = isset($_POST['use_existing_image']) && $_POST['use_existing_image'];
+        $imageFileName = $this->postParam('image');
+
+        if ($keepCurrentImage && !empty($currentImage)) {
+            $data['image_url'] = $currentImage;
+        }
+
+        else if ($useExistingImage && !empty($imageFileName)) {
+            $data['image_url'] = $imageFileName;
+        }
+
+        else if (isset($_FILES['image_upload']) && $_FILES['image_upload']['error'] !== UPLOAD_ERR_NO_FILE) {
+
+            $uploadDir = ROOT_DIR . '/public/images/plantes/uploads/';
+            $uploader = new \App\Utils\FileUploader($uploadDir);
+
+            $slug = $this->slugify($data['nom']);
+            $uniqueFileName = $slug . '_' . uniqid();
+
+            if ($uploader->upload($_FILES['image_upload'], $uniqueFileName)) {
+                $data['image_url'] = 'uploads/' . $uploader->getUploadedFileName();
+            } else {
+                $categorieModel = new Categorie();
+                $categories = $categorieModel->select();
+                $this->display('plante/edit', [
+                    'pageTitle' => 'Modifier la plante',
+                    'plante' => array_merge(['id' => $id], $data, ['image' => $currentImage]),
+                    'categories' => $categories,
+                    'errors' => $uploader->getErrors()
+                ]);
+                return;
+            }
+        }
+        else if ($currentImage) {
+            $data['image_url'] = $currentImage;
+        }
+
         $plante = new Plante();
         $errors = $plante->validate($data);
         
@@ -182,7 +252,7 @@ class PlanteController extends Controller {
             $categories = $categorieModel->select();
             $this->display('plante/edit', [
                 'pageTitle' => 'Modifier la plante',
-                'plante' => array_merge(['id' => $id], $data),
+                'plante' => array_merge(['id' => $id], $data, ['image' => $data['image_url'] ?? $currentImage]),
                 'categories' => $categories,
                 'errors' => $errors
             ]);
@@ -200,7 +270,7 @@ class PlanteController extends Controller {
             $categories = $categorieModel->select();
             $this->display('plante/edit', [
                 'pageTitle' => 'Modifier la plante',
-                'plante' => array_merge(['id' => $id], $data),
+                'plante' => array_merge(['id' => $id], $data, ['image' => $data['image_url'] ?? $currentImage]),
                 'categories' => $categories
             ]);
         }
@@ -211,6 +281,7 @@ class PlanteController extends Controller {
      * 
      * @param int $id ID de la plante
      */    public function delete($id) {
+        $this->requireAdmin();
         $plante = new Plante();
         $planteData = $plante->selectId($id);
         
@@ -274,5 +345,32 @@ class PlanteController extends Controller {
             'current_categorie' => $categorieId,
             'search_query' => $keyword
         ]);
+    }
+    
+    /**
+     * Génère un slug à partir d'une chaîne
+     *
+     * @param string $text Texte à transformer en slug
+     * @return string Slug
+     */
+    private function slugify(string $text): string {
+        $text = preg_replace('~[^\pL\d]+~u', '-', $text);
+
+        setlocale(LC_ALL, 'en_US.utf8');
+        $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+
+        $text = preg_replace('~[^-\w]+~', '', $text);
+
+        $text = trim($text, '-');
+
+        $text = preg_replace('~-+~', '-', $text);
+
+        $text = strtolower($text);
+        
+        if (empty($text)) {
+            return 'n-a';
+        }
+        
+        return $text;
     }
 }

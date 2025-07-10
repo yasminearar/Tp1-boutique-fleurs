@@ -64,9 +64,15 @@
                 </div>
                 {% endif %}
                   <div class="plante-actions">
-                    <a href="{{ BASE_URL }}/plante/{{ plante.id }}/edit" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> Modifier
-                    </a>
+                    {% if user is defined and user and user.privilege == 'admin' %}
+                        <a href="{{ BASE_URL }}/plante/{{ plante.id }}/edit" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                        <a href="{{ BASE_URL }}/plante/{{ plante.id }}/delete" class="btn btn-danger" 
+                           onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette plante ?')">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

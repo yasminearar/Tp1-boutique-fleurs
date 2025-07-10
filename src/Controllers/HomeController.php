@@ -9,7 +9,8 @@ use App\Models\Categorie;
 class HomeController extends Controller {
     /**
      * Affiche la page d'accueil
-     */    public function index() {
+     */
+    public function index() {
         // Récupérer les compteurs pour la page d'accueil en utilisant les modèles modernes
         $plante = new Plante();
         $client = new Client();
@@ -21,12 +22,16 @@ class HomeController extends Controller {
         $totalCommandes = count($commande->select());
         $totalCategories = count($categorie->select());
         
-        $this->display('home', [
+        $data = [
             'pageTitle' => 'Boutique de Plantes - Administration',
             'total_plantes' => $totalPlantes,
             'total_clients' => $totalClients,
             'total_commandes' => $totalCommandes,
-            'total_categories' => $totalCategories
-        ]);
+            'total_categories' => $totalCategories,
+            'flash_messages' => $this->getFlashMessages()
+        ];
+        
+        // Afficher la page d'accueil
+        $this->display('home', $data);
     }
 }

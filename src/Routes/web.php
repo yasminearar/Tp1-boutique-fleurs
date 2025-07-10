@@ -10,9 +10,17 @@ use App\Controllers\PlanteController;
 use App\Controllers\CategorieController;
 use App\Controllers\ClientController;
 use App\Controllers\CommandeController;
+use App\Controllers\AuthController;
 
 // Routes pour la page d'accueil
 Route::get('/', [HomeController::class, 'index']);
+
+// Routes d'authentification
+Route::get('/login', [AuthController::class, 'login']);
+Route::post('/authenticate', [AuthController::class, 'authenticate']);
+Route::get('/logout', [AuthController::class, 'logout']);
+Route::get('/register', [AuthController::class, 'register']);
+Route::post('/register', [AuthController::class, 'store']);
 
 // Routes pour les plantes
 Route::get('/plantes', [PlanteController::class, 'index']);
@@ -51,4 +59,3 @@ Route::post('/commande/store', [CommandeController::class, 'store']);
 Route::get('/commande/{id}', [CommandeController::class, 'show']);
 Route::get('/commande/{id}/edit', [CommandeController::class, 'edit']);
 Route::post('/commande/{id}/update', [CommandeController::class, 'update']);
-// La fonction updateStatus est maintenant gérée directement via la méthode update

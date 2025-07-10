@@ -41,11 +41,9 @@ class ClientController extends Controller {
             'commandes' => $commandes
         ]);
     }
-    
-    /**
-     * Affiche le formulaire de création d'un client
-     */
+
     public function create() {
+        $this->requireAuth();
         $this->display('client/create', [
             'pageTitle' => 'Nouveau client'
         ]);
@@ -55,6 +53,7 @@ class ClientController extends Controller {
      * Traite la soumission du formulaire de création
      */
     public function store() {
+        $this->requireAuth();
         if (!$this->isPost()) {
             $this->redirect('/clients');
             return;
@@ -67,8 +66,7 @@ class ClientController extends Controller {
             'adresse' => $this->postParam('adresse'),
             'telephone' => $this->postParam('telephone')
         ];
-        
-        // Validation des données
+
         $client = new Client();
         $errors = $client->validate($data);
         
@@ -101,6 +99,7 @@ class ClientController extends Controller {
      * @param int $id ID du client
      */
     public function edit($id) {
+        $this->requireAdmin();
         $client = new Client();
         $clientData = $client->selectId($id);
         
@@ -114,13 +113,9 @@ class ClientController extends Controller {
             'client' => $clientData
         ]);
     }
-    
-    /**
-     * Traite la soumission du formulaire d'édition
-     * 
-     * @param int $id ID du client
-     */    public function update($id) {
-        // Debug - Vérifier si on entre dans la méthode et si c'est un POST
+
+    public function update($id) {
+        $this->requireAdmin();
         error_log('ClientController::update() - ID: ' . $id . ', Method: ' . $_SERVER['REQUEST_METHOD']);
         
         if (!$this->isPost()) {
@@ -132,7 +127,7 @@ class ClientController extends Controller {
         error_log('ClientController::update() - Processing POST request');
         
         $data = [
-            'id' => $id,  // Inclure l'ID du client pour la validation de l'email unique
+            'id' => $id,
             'nom' => $this->postParam('nom'),
             'prenom' => $this->postParam('prenom'),
             'email' => $this->postParam('email'),
@@ -177,6 +172,7 @@ class ClientController extends Controller {
      * @param int $id ID du client
      */
     public function delete($id) {
+        $this->requireAdmin();
         $client = new Client();
         $clientData = $client->selectId($id);
         

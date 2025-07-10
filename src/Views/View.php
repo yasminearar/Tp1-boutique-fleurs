@@ -25,9 +25,13 @@ class View {
         // Création de l'environnement Twig
         self::$twig = new \Twig\Environment($loader, $options);
 
-        // Ajouter des fonctions ou filtres globaux ici si nécessaire
         self::$twig->addGlobal('BASE_URL', BASE_URL);
         self::$twig->addGlobal('ASSETS_URL', ASSETS_URL);
+
+        self::$twig->addGlobal('user', $_SESSION['user'] ?? null);
+        self::$twig->addGlobal('user_id', $_SESSION['user_id'] ?? null);
+        self::$twig->addGlobal('is_authenticated', isset($_SESSION['user_id']));
+        self::$twig->addGlobal('user_privilege', $_SESSION['privilege'] ?? null);
     }
 
     /**

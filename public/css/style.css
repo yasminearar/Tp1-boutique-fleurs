@@ -108,8 +108,13 @@ textarea {
     max-width: 66.666667%;
 }
 
+.col-md-12 {
+    flex: 0 0 100%;
+    max-width: 100%;
+}
+
 @media (max-width: 768px) {
-    .col-md-4, .col-md-6, .col-md-8 {
+    .col-md-4, .col-md-6, .col-md-8, .col-md-12 {
         flex: 0 0 100%;
         max-width: 100%;
     }
@@ -1254,7 +1259,24 @@ body {
     margin-right: 5px;
 }
 
-/* Rendre le menu responsive */
+/* Styles spécifiques pour les onglets connexion/déconnexion dans le menu */
+.nav-menu li a[href*="/login"] {
+    background-color: rgba(44, 122, 75, 0.2);
+}
+
+.nav-menu li a[href*="/login"]:hover {
+    background-color: rgba(44, 122, 75, 0.4);
+}
+
+.nav-menu li a[href*="/logout"] {
+    background-color: rgba(220, 53, 69, 0.2);
+}
+
+.nav-menu li a[href*="/logout"]:hover {
+    background-color: rgba(220, 53, 69, 0.4);
+}
+
+/* Responsive Navigation */
 @media (max-width: 768px) {
     .nav-container {
         flex-direction: column;
@@ -2297,4 +2319,495 @@ select#statut option {
     border-radius: 10px;
     border: none;
 } */
+
+/* Navigation Auth Styles */
+.nav-auth {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto;
+}
+
+.user-welcome {
+    color: #333;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.user-role {
+    color: #666;
+    font-size: 12px;
+    font-style: italic;
+}
+
+.btn-login {
+    background: #2c7a4b;
+    color: white;
+}
+
+.btn-login:hover {
+    background: #256a41;
+}
+
+.btn-register {
+    background: #007bff;
+    color: white;
+}
+
+.btn-register:hover {
+    background: #0056b3;
+}
+
+.btn-logout {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-logout:hover {
+    background: #c82333;
+}
+
+/* Responsive Navigation */
+@media (max-width: 768px) {
+    .nav-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .nav-menu {
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .nav-auth {
+        justify-content: center;
+    }
+}
+
+/* Styles spécifiques pour les pages d'authentification */
+.auth-page .page-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-page .page-header h2 {
+    color: #2c7a4b;
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.auth-page .page-header p {
+    color: #666;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.auth-page .form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.auth-page .form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.auth-page .form-actions .btn {
+    min-width: 140px;
+    padding: 12px 20px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.auth-page .form-label-lg {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.auth-page .form-label-lg i {
+    color: #2c7a4b;
+    margin-right: 8px;
+}
+
+.auth-page .form-control {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 15px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.auth-page .form-control:focus {
+    border-color: #2c7a4b;
+    box-shadow: 0 0 0 3px rgba(44, 122, 75, 0.1);
+    outline: none;
+}
+
+.auth-page .form-control::placeholder {
+    color: #a0aec0;
+    font-style: italic;
+}
+
+/* Styles pour les messages d'erreur dans les formulaires d'authentification */
+.auth-page .alert {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.auth-page .alert i {
+    font-size: 1.2rem;
+}
+
+.auth-page .alert-error {
+    background-color: #fee;
+    color: #c53030;
+    border: 1px solid #feb2b2;
+}
+
+.auth-page .alert-success {
+    background-color: #f0fff4;
+    color: #22543d;
+    border: 1px solid #9ae6b4;
+}
+
+.auth-page .alert-info {
+    background-color: #ebf8ff;
+    color: #2c5282;
+    border: 1px solid #90cdf4;
+}
+
+/* Responsive pour les pages d'authentification */
+@media (max-width: 768px) {
+    .auth-page .form-container {
+        margin: 0 20px;
+        padding: 20px;
+    }
+    
+    .auth-page .form-row {
+        flex-direction: column;
+    }
+    
+    .auth-page .form-group {
+        padding: 0;
+    }
+    
+    .auth-page .form-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .auth-page .form-actions .btn {
+        width: 100%;
+        max-width: 250px;
+    }
+}
+
+/* Amélioration du style de navigation pour les utilisateurs connectés */
+.nav-auth .user-welcome {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.nav-auth .user-role {
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+.nav-auth .btn {
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.nav-auth .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Style pour la section d'inscription sur la page de connexion */
+.auth-separator {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    text-align: center;
+}
+
+.auth-separator p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.auth-separator .btn-register {
+    background: #007bff;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 6px;
+    transition: background-color 0.3s;
+    display: inline-block;
+    text-decoration: none;
+}
+
+.auth-separator .btn-register:hover {
+    background: #0056b3;
+}
+
+/* Styles pour la page de connexion centrée */
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 20px;
+}
+
+.login-container {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 450px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.login-header {
+    background-color: #f8f9fa;
+    padding: 25px 30px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.login-header h2 {
+    color: #2c7a4b;
+    margin-bottom: 10px;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.login-header p {
+    color: #6c757d;
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+.login-form-container {
+    padding: 30px;
+}
+
+.login-form .form-group {
+    margin-bottom: 20px;
+}
+
+.login-form .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #495057;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.login-form .form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #dce4ec;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.login-form .form-group input:focus {
+    border-color: #2c7a4b;
+    box-shadow: 0 0 0 3px rgba(44, 122, 75, 0.15);
+    outline: none;
+}
+
+.login-form .form-actions {
+    margin-top: 30px;
+}
+
+.btn-login-submit {
+    background-color: #2c7a4b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 12px 20px;
+    width: 100%;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-login-submit:hover {
+    background-color: #236a3e;
+}
+
+.login-form .auth-separator {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    text-align: center;
+}
+
+.login-form .auth-separator p {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.btn-register-link {
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 15px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.btn-register-link:hover {
+    background-color: #0056b3;
+}
+
+.login-footer {
+    padding: 15px 30px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #eee;
+    text-align: center;
+}
+
+.back-to-home {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s;
+}
+
+.back-to-home:hover {
+    color: #2c7a4b;
+}
+
+/* Styles pour le menu utilisateur et popover */
+.user-menu-container {
+    position: relative;
+}
+
+.user-welcome {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.user-welcome:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.user-welcome i.fa-chevron-down {
+    font-size: 12px;
+    margin-left: 5px;
+    transition: transform 0.3s;
+}
+
+.user-welcome.active i.fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+.user-popover {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background-color: white;
+    border-radius: 6px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+}
+
+.user-popover.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.popover-arrow {
+    position: absolute;
+    top: -8px;
+    right: 15px;
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    transform: rotate(45deg);
+    border-top: 1px solid #eee;
+    border-left: 1px solid #eee;
+}
+
+.user-menu {
+    list-style: none;
+    margin: 0;
+    padding: 8px 0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.user-menu li {
+    margin: 0;
+    padding: 0;
+}
+
+.user-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: #333;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.user-menu li a:hover {
+    background-color: #f5f5f5;
+    color: #2c7a4b;
+}
+
+.user-menu li a i {
+    margin-right: 10px;
+    width: 16px;
+    text-align: center;
+}
 

@@ -46,6 +46,7 @@ class CategorieController extends Controller {    /**
      * Affiche le formulaire de création de catégorie
      */
     public function create() {
+        $this->requireAdmin();
         $this->display('categorie/create', [
             'pageTitle' => 'Créer une catégorie'
         ]);
@@ -54,6 +55,7 @@ class CategorieController extends Controller {    /**
      * Traite la soumission du formulaire de création
      */
     public function store() {
+        $this->requireAdmin();
         if (!$this->isPost()) {
             $this->redirect('/categories');
             return;
@@ -63,8 +65,7 @@ class CategorieController extends Controller {    /**
             'nom' => $this->postParam('nom'),
             'description' => $this->postParam('description')
         ];
-        
-        // Validation avec la méthode validate() du modèle
+
         $categorie = new Categorie();
         $errors = $categorie->validate($data);
         
@@ -76,8 +77,7 @@ class CategorieController extends Controller {    /**
             ]);
             return;
         }
-        
-        // Utiliser la méthode insert() du modèle
+
         $id = $categorie->insert($data);
         
         if ($id) {
@@ -90,12 +90,11 @@ class CategorieController extends Controller {    /**
                 'categorie' => $data
             ]);
         }
-    }    /**
-     * Affiche le formulaire d'édition
-     * 
-     * @param int $id ID de la catégorie
-     */
+    }
+
     public function edit($id) {
+        $this->requireAdmin();
+        
         $categorie = new Categorie();
         $categorieData = $categorie->selectId($id);
         
@@ -114,6 +113,7 @@ class CategorieController extends Controller {    /**
      * @param int $id ID de la catégorie
      */
     public function update($id) {
+        $this->requireAdmin();
         if (!$this->isPost()) {
             $this->redirect('/categories');
             return;
@@ -123,8 +123,7 @@ class CategorieController extends Controller {    /**
             'nom' => $this->postParam('nom'),
             'description' => $this->postParam('description')
         ];
-        
-        // Utiliser la méthode validate() du modèle
+
         $categorie = new Categorie();
         $errors = $categorie->validate($data);
         
@@ -136,8 +135,7 @@ class CategorieController extends Controller {    /**
             ]);
             return;
         }
-        
-        // Utiliser la méthode update
+
         $result = $categorie->update($data, $id);
         
         if ($result) {
@@ -150,12 +148,10 @@ class CategorieController extends Controller {    /**
                 'categorie' => array_merge(['id' => $id], $data)
             ]);
         }
-    }    /**
-     * Supprime une catégorie
-     * 
-     * @param int $id ID de la catégorie
-     */
+    }
+
     public function delete($id) {
+        $this->requireAdmin();
         $categorie = new Categorie();
         $categorieData = $categorie->selectId($id);
         
@@ -163,8 +159,7 @@ class CategorieController extends Controller {    /**
             $this->error(404, 'Catégorie non trouvée');
             return;
         }
-        
-        // Vérifier si la catégorie a des plantes
+
         $plante = new Plante();
         $plantes = $plante->getByCategory($id);
         

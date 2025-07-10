@@ -2,6 +2,10 @@
 
 {% block title %}Modifier {{ plante.nom }} - Fleurs & Plantes{% endblock %}
 
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ ASSETS_URL }}/css/file-upload.css">
+{% endblock %}
+
 {% block content %}
     <div class="breadcrumb">
         <a href="{{ BASE_URL }}/"><i class="fas fa-home"></i> Accueil</a> &gt;
@@ -18,7 +22,7 @@
             </a>
         </div>
     </div>    <div class="form-container">
-        <form action="{{ BASE_URL }}/plante/{{ plante.id }}/update" method="post" class="form">
+        <form action="{{ BASE_URL }}/plante/{{ plante.id }}/update" method="post" enctype="multipart/form-data" class="form">
             {% if errors is defined and errors|length > 0 %}
                 <div class="alert alert-danger">
                     <h4><i class="fas fa-exclamation-triangle"></i> Erreurs dans le formulaire</h4>
@@ -69,20 +73,37 @@
                     </div>
                 </div>
             </div>            <div class="form-group">
-                <label for="image" class="form-label-lg mb-2">Image</label>
+                <label for="image_upload" class="form-label-lg mb-2">Image</label>
                 <div class="image-upload-container">
-                    <input type="text" id="image" name="image" class="form-control form-control-lg py-3" style="height: auto; font-size: 1.1rem;" value="{{ plante.image }}" 
-                           placeholder="nom-fichier.jpg">
-                    <small class="form-text text-muted">L'image doit être dans le dossier public/images/plantes/</small>
-                    
                     {% if plante.image %}
-                        <div class="current-image">
+                        <div class="current-image mb-3">
                             <p>Image actuelle :</p>
                             <div class="image-preview">
                                 <img src="{{ ASSETS_URL }}/images/plantes/{{ plante.image }}" alt="{{ plante.nom }}">
                             </div>
+                            <input type="hidden" name="current_image" value="{{ plante.image }}">
                         </div>
                     {% endif %}
+                    
+                    <div class="custom-file-upload">
+                        <input type="file" id="image_upload" name="image_upload" class="form-control-file" accept="image/*">
+                        <small class="form-text text-muted">Formats acceptés: JPG, JPEG, PNG, GIF - Max 2 Mo</small>
+                        <div class="form-check mt-2">
+                            <input type="checkbox" class="form-check-input" id="keep_current_image" name="keep_current_image" checked>
+                            <label class="form-check-label" for="keep_current_image">Conserver l'image actuelle si aucune nouvelle image n'est téléchargée</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-check mt-2">
+                        <input type="checkbox" class="form-check-input" id="use_existing_image" name="use_existing_image">
+                        <label class="form-check-label" for="use_existing_image">Utiliser une autre image existante</label>
+                    </div>
+                    
+                    <div id="existing_image_input" class="mt-2" style="display: none;">
+                        <input type="text" id="image" name="image" class="form-control form-control-lg py-3" style="height: auto; font-size: 1.1rem;" value="{{ plante.image }}" 
+                               placeholder="nom-fichier.jpg">
+                        <small class="form-text text-muted">L'image doit être dans le dossier public/images/plantes/</small>
+                    </div>
                 </div>
             </div>
 
@@ -96,4 +117,61 @@
             </div>
         </form>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const useExistingImage = document.getElementById('use_existing_image');
+        const existingImageInput = document.getElementById('existing_image_input');
+        const imageUpload = document.getElementById('image_upload');
+        const keepCurrentImage = document.getElementById('keep_current_image');
+        
+        useExistingImage.addEventListener('change', function() {
+            if(this.checked) {
+                existingImageInput.style.display = 'block';
+                imageUpload.disabled = true;
+                if(keepCurrentImage) keepCurrentImage.checked = false;
+            } else {
+                existingImageInput.style.display = 'none';
+                imageUpload.disabled = false;
+                if(keepCurrentImage) keepCurrentImage.checked = true;
+            }
+        });
+        
+        if(imageUpload) {
+            imageUpload.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    if(keepCurrentImage) keepCurrentImage.checked = false;
+                    if(useExistingImage) useExistingImage.checked = false;
+                    if(existingImageInput) existingImageInput.style.display = 'none';
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Créer ou mettre à jour la prévisualisation
+                        let preview = document.querySelector('.current-image');
+                        
+                        if (!preview) {
+                            preview = document.createElement('div');
+                            preview.className = 'current-image mb-3';
+                            preview.innerHTML = `
+                                <p>Aperçu de la nouvelle image :</p>
+                                <div class="image-preview">
+                                    <img src="${e.target.result}" alt="Prévisualisation">
+                                </div>
+                            `;
+                            document.querySelector('.image-upload-container').insertBefore(preview, document.querySelector('.custom-file-upload'));
+                        } else {
+                            preview.querySelector('p').textContent = 'Aperçu de la nouvelle image :';
+                            const img = preview.querySelector('img');
+                            img.src = e.target.result;
+                        }
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

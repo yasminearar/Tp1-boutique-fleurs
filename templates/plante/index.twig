@@ -5,7 +5,9 @@
 {% block content %}
     <div class="page-header">
         <h2><i class="fas fa-seedling"></i> Nos plantes</h2>
-        <a href="{{ BASE_URL }}/plante/create" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter une plante</a>
+        {% if user is defined and user and user.privilege == 'admin' %}
+            <a href="{{ BASE_URL }}/plante/create" class="btn btn-primary"><i class="fas fa-plus"></i> Ajouter une plante</a>
+        {% endif %}
     </div>    <div class="filters">
         <div class="row">
             <div class="col-md-12">
@@ -74,9 +76,11 @@
                             <a href="{{ BASE_URL }}/plante/{{ plante.id }}" class="btn btn-sm btn-secondary">
                                 <i class="fas fa-eye"></i> Détails
                             </a>
-                            <a href="{{ BASE_URL }}/plante/{{ plante.id }}/edit" class="btn btn-sm btn-primary">
-                                <i class="fas fa-edit"></i> Modifier
-                            </a>
+                            {% if user is defined and user and user.privilege == 'admin' %}
+                                <a href="{{ BASE_URL }}/plante/{{ plante.id }}/edit" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-edit"></i> Modifier
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

@@ -19,7 +19,40 @@
                 <li><a href="{{ BASE_URL }}/categories"><i class="fas fa-tags"></i> Catégories</a></li>
                 <li><a href="{{ BASE_URL }}/clients"><i class="fas fa-users"></i> Clients</a></li>
                 <li><a href="{{ BASE_URL }}/commandes"><i class="fas fa-shopping-cart"></i> Commandes</a></li>
+                {% if not (user is defined and user) %}
+                    <li><a href="{{ BASE_URL }}/login"><i class="fas fa-sign-in-alt"></i> Connexion</a></li>
+                {% endif %}
             </ul>
+            
+            <div class="nav-auth">
+                {% if user is defined and user %}
+                    <div class="user-menu-container">
+                        <div class="user-welcome" id="userMenuToggle">
+                            <i class="fas fa-user"></i> 
+                            {{ user.name }}
+                            {% if user.privilege %}
+                                <span class="user-role">({{ user.privilege }})</span>
+                            {% endif %}
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="user-popover" id="userPopover">
+                            <div class="popover-arrow"></div>
+                            <ul class="user-menu">
+                                <li>
+                                    <a href="{{ BASE_URL }}/profile">
+                                        <i class="fas fa-id-card"></i> Mon profil
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ BASE_URL }}/logout">
+                                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </nav>
     {% endblock %}
@@ -56,6 +89,26 @@
             setTimeout(function() {
                 $('.flash-message').fadeOut('slow');
             }, 5000);
+            
+            // Gestion du menu utilisateur popover
+            const userMenuToggle = $('#userMenuToggle');
+            const userPopover = $('#userPopover');
+            
+            // Ouvrir/fermer le popover au clic sur le nom d'utilisateur
+            userMenuToggle.on('click', function(e) {
+                e.stopPropagation();
+                userMenuToggle.toggleClass('active');
+                userPopover.toggleClass('active');
+            });
+            
+            // Fermer le popover au clic en dehors
+            $(document).on('click', function(e) {
+                if (!userMenuToggle.is(e.target) && userMenuToggle.has(e.target).length === 0 && 
+                    !userPopover.is(e.target) && userPopover.has(e.target).length === 0) {
+                    userMenuToggle.removeClass('active');
+                    userPopover.removeClass('active');
+                }
+            });
             
             // Prévisualisation d'image pour les formulaires
             $('#image').on('change', function() {

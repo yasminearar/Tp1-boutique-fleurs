@@ -147,4 +147,110 @@ abstract class Controller {
         
         return $messages;
     }
+    
+    /**
+     * Vérifie si un utilisateur est authentifié
+     * 
+     * @return bool True si authentifié
+     */
+    protected function isAuthenticated(): bool {
+        return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+    }
+    
+    /**
+     * Récupère l'utilisateur connecté
+     * 
+     * @return array|null Utilisateur connecté ou null
+     */
+    protected function getCurrentUser(): ?array {
+        return $_SESSION['user'] ?? null;
+    }
+    
+    /**
+     * Récupère l'ID de l'utilisateur connecté
+     * 
+     * @return int|null ID utilisateur ou null
+     */
+    protected function getCurrentUserId(): ?int {
+        return $_SESSION['user_id'] ?? null;
+    }
+    
+    /**
+     * Vérifie si l'utilisateur a un privilège spécifique
+     * 
+     * @param string $privilege Privilège à vérifier
+     * @return bool True si l'utilisateur a le privilège
+     */
+    protected function hasPrivilege(string $privilege): bool {
+        return isset($_SESSION['privilege']) && $_SESSION['privilege'] === $privilege;
+    }
+    
+    /**
+     * Vérifie si l'utilisateur est admin
+     * 
+     * @return bool True si admin
+     */
+    protected function isAdmin(): bool {
+        return $this->hasPrivilege('admin');
+    }
+    
+    /**
+     * Redirige vers la page de connexion si non authentifié
+     */
+    protected function requireAuth(): void {
+        if (!$this->isAuthenticated()) {
+            $this->addFlashMessage('Vous devez être connecté pour accéder à cette page', 'error');
+            $this->redirect('/login');
+        }
+    }
+    
+    /**
+     * Vérifie l'authentification sauf pour les pages autorisées sans connexion
+     * Utilisé au début de chaque méthode contrôleur qui doit être protégée
+     * 
+     * @param string $route La route actuelle
+     */
+    public function checkAuthentication(string $route = ''): void {
+        // Les routes autorisées sans authentification
+        $publicRoutes = [
+            '/',             // Page d'accueil
+            '/login',        // Page de connexion
+            '/authenticate', // Processus d'authentification 
+            '/register',     // Page d'inscription
+            '/force-logout', // Pour debug
+            '/logout'        // Déconnexion
+        ];
+        
+        // Log pour débogage
+        error_log("checkAuthentication - Route actuelle: " . $route);
+        
+        // Vérification spéciale pour la page d'accueil - plusieurs URLs peuvent y conduire
+        $isHomePage = ($route === '/' || $route === '/Tp1-boutique-fleurs/' || $route === '/Tp1-boutique-fleurs' || $route === '');
+        
+        error_log("checkAuthentication - Est page d'accueil: " . ($isHomePage ? 'OUI' : 'NON'));
+        error_log("checkAuthentication - Route est publique: " . ((in_array($route, $publicRoutes) || $isHomePage) ? 'OUI' : 'NON'));
+        error_log("checkAuthentication - Utilisateur authentifié: " . ($this->isAuthenticated() ? 'OUI' : 'NON'));
+        
+        // Si la route n'est pas dans les routes publiques et n'est pas la page d'accueil, exiger l'authentification
+        if (!in_array($route, $publicRoutes) && !$isHomePage && !$this->isAuthenticated()) {
+            // Stocker l'URL que l'utilisateur essayait d'accéder pour pouvoir y revenir après connexion
+            $_SESSION['requested_page'] = $route;
+            
+            error_log("checkAuthentication - Redirection vers login car route non publique et utilisateur non authentifié");
+            $this->addFlashMessage('Vous devez être connecté pour accéder à cette page', 'error');
+            $this->redirect('/login');
+        }
+    }
+    
+    /**
+     * Redirige vers la page d'accueil si non admin
+     */
+    protected function requireAdmin(): void {
+        $this->requireAuth();
+        
+        if (!$this->isAdmin()) {
+            $this->addFlashMessage('Accès refusé. Privilèges administrateur requis', 'error');
+            $this->redirect('/');
+        }
+    }
 }

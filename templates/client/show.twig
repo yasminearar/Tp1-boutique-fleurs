@@ -14,9 +14,12 @@
         <div class="page-header-actions">
             <a href="{{ BASE_URL }}/clients" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Retour à la liste
-            </a>            <a href="{{ BASE_URL }}/client/{{ client.id }}/edit" class="btn btn-primary">
+            </a>
+            {% if user is defined and user and user.privilege == 'admin' %}
+            <a href="{{ BASE_URL }}/client/{{ client.id }}/edit" class="btn btn-primary">
                 <i class="fas fa-edit"></i> Modifier
             </a>
+            {% endif %}
             <a href="{{ BASE_URL }}/client/{{ client.id }}/commande/create" class="btn btn-success">
                 <i class="fas fa-plus-circle"></i> Nouvelle commande
             </a>
@@ -107,9 +110,11 @@
                                         <a href="{{ BASE_URL }}/commande/{{ commande.id }}" class="btn btn-sm btn-info" title="Voir la commande">
                                             <i class="fas fa-eye"></i>
                                         </a>
+                                        {% if user is defined and user and user.privilege == 'admin' %}
                                         <a href="{{ BASE_URL }}/commande/{{ commande.id }}/edit" class="btn btn-sm btn-primary" title="Modifier la commande">
                                             <i class="fas fa-edit"></i>
                                         </a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}

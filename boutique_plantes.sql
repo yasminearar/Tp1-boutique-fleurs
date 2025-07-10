@@ -317,11 +317,23 @@ ALTER TABLE `users`
 --
 
 --
+-- Contraintes pour la table `commandes`
+--
+ALTER TABLE `commandes`
+    ADD CONSTRAINT `commandes_ibfk_1` FOREIGN KEY (`id_client`) REFERENCES `clients` (`id`) ON DELETE RESTRICT;
+
+--
 -- Contraintes pour la table `commande_details`
 --
 ALTER TABLE `commande_details`
     ADD CONSTRAINT `commande_details_ibfk_1` FOREIGN KEY (`id_commande`) REFERENCES `commandes` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `commande_details_ibfk_2` FOREIGN KEY (`id_plante`) REFERENCES `plantes` (`id`);
+
+--
+-- Contraintes pour la table `plantes`
+--
+ALTER TABLE `plantes`
+    ADD CONSTRAINT `plantes_ibfk_1` FOREIGN KEY (`id_categorie`) REFERENCES `categories` (`id`) ON DELETE RESTRICT;
 
 --
 -- Contraintes pour la table `users`
